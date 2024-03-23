@@ -14,19 +14,23 @@ public class PlayerInputHandler : MonoBehaviour
 
     [Header("Action Map Name References")] 
     [SerializeField] private string move = "Move";
+    [SerializeField] private string zoom = "Zoom";
 
     [Header("Components")]
     [SerializeField] private Player player;
 
     private InputAction moveAction;
+    private InputAction zoomAction;
     
-    public Vector2 MoveInput { get; private set; }
     public static PlayerInputHandler Instance { get; private set; }
+    public Vector2 MoveInput { get; private set; }
+    public Vector2 ZoomInput { get; private set; }
     public float Horizontal { get; private set; }
     public float Vertical { get; private set; }
     public float MoveAmount { get; private set; }
     public float MouseX { get; private set; }
     public float MouseY { get; private set; }
+    public float MouseScrollWheel { get; private set; }
 
     private void Awake()
     {
@@ -37,10 +41,11 @@ public class PlayerInputHandler : MonoBehaviour
         }
         else
         {
-            Destroy(gameObject);
+            DestroyImmediate(gameObject);
         }
 
         moveAction = playerControls.FindActionMap(actionMapName).FindAction(move);
+        zoomAction = playerControls.FindActionMap(actionMapName).FindAction(zoom);
 
         RegisterInputActions();
     }
@@ -49,16 +54,21 @@ public class PlayerInputHandler : MonoBehaviour
     {
         moveAction.performed += context => MoveInput = context.ReadValue<Vector2>();
         moveAction.canceled += context => MoveInput = Vector2.zero;
+
+        zoomAction.performed += context => ZoomInput = context.ReadValue<Vector2>();
+        zoomAction.canceled += context => ZoomInput = Vector2.zero;
     }
 
     private void OnEnable()
     {
         moveAction.Enable();
+        zoomAction.Enable();
     }
 
     private void OnDisable()
     {
         moveAction.Disable();
+        zoomAction.Disable();
     }
 
     public void TickInput()
@@ -71,5 +81,7 @@ public class PlayerInputHandler : MonoBehaviour
         Horizontal = MoveInput.x;
         Vertical = MoveInput.y;
         MoveAmount = Mathf.Clamp01(Mathf.Abs(Horizontal) + Mathf.Abs(Vertical));
+
+        MouseScrollWheel = -ZoomInput.y;
     }
 }

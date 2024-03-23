@@ -1,19 +1,22 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class Player : MonoBehaviour
 {
     [SerializeField] private PlayerInputHandler playerInputHandler;
     [SerializeField] private PlayerMovement playerMovement;
-    [SerializeField] private PlayerCamera playerCamera;
+    [SerializeField] private CameraHandler cameraHandler;
+    // [SerializeField] private SpriteRenderer playerRenderer;
+    // [SerializeField] private Transform shadowTransform;
     
     public PlayerMovement PlayerMovement => playerMovement;
-    public PlayerCamera PlayerCamera => playerCamera;
+    public CameraHandler CameraHandler => cameraHandler;
 
     private void Start()
     {
         playerInputHandler = PlayerInputHandler.Instance;
-        playerCamera = PlayerCamera.Instance;
+        cameraHandler = CameraHandler.Instance;
         
         playerMovement = GetComponent<PlayerMovement>();
     }
@@ -23,12 +26,14 @@ public class Player : MonoBehaviour
         playerInputHandler.TickInput();
         
         playerMovement.Movement(5);
+        
     }
 
-    private void LateUpdate()
+    private void FixedUpdate()
     {                
-        float delta = Time.deltaTime;
+        float delta = Time.fixedDeltaTime;
         
-        playerCamera.FollowTarget(delta);
+        cameraHandler.FollowTarget(delta);
+        if (!EventSystem.current.IsPointerOverGameObject()) cameraHandler.Zoom(-playerInputHandler.MouseScrollWheel);
     }
 }

@@ -4,7 +4,7 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     [SerializeField] private new Rigidbody rigidbody;
-    [SerializeField] private PlayerCamera playerCamera;
+    [SerializeField] private Player player;
     [SerializeField] private PlayerInputHandler playerInputHandler;
     
     private Vector3 moveDirection;
@@ -17,10 +17,9 @@ public class PlayerMovement : MonoBehaviour
     private void Start()
     {
         rigidbody = GetComponent<Rigidbody>();
-        playerCamera = PlayerCamera.Instance;
         playerInputHandler = PlayerInputHandler.Instance;
         
-        cameraTransform = playerCamera.CameraTransform;
+        cameraTransform = player.CameraHandler.Camera.transform;
     }
 
     public void Movement(float speed)

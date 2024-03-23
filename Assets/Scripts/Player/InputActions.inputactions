@@ -15,9 +15,9 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "Look",
-                    "type": "Value",
-                    "id": "8a457686-55b6-4929-a215-7eb1628320bf",
+                    "name": "Zoom",
+                    "type": "PassThrough",
+                    "id": "eed964f0-c6b3-4d70-9cd8-1041bb233336",
                     "expectedControlType": "Vector2",
                     "processors": "",
                     "interactions": "",
@@ -82,12 +82,12 @@
                 },
                 {
                     "name": "",
-                    "id": "a16704ce-91a6-4b50-942f-1bb36eefb581",
-                    "path": "<Mouse>/delta",
+                    "id": "209f6a7f-70ec-49aa-977b-96c4e0e4387f",
+                    "path": "<Mouse>/scroll",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Look",
+                    "action": "Zoom",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
