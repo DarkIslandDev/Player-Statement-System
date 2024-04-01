@@ -38,7 +38,7 @@ public class Generator : MonoBehaviour
         binarySpacePartitioner.Init(dungeonWidth, dungeonLength);
         allRoomsCollection = binarySpacePartitioner.PrepareNodesCollection(maxIterations, roomWidthMin, roomLengthMin);
         List<Node> roomSpaces = StructureHelper.TraverseGraphToExtractLowestLeafes(binarySpacePartitioner.RoomNode);
-
+        
         roomList = roomGenerator.GenerateRoomsInGivenSpaces(
             roomSpaces,
             roomBottomCornerModifier,

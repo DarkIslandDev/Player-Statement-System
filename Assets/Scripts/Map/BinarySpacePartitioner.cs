@@ -108,7 +108,7 @@ public class BinarySpacePartitioner : MonoBehaviour
         {
             orientation = Orientation.Horizontal;
         }
-
+        
         return new Line(orientation, GetCoordinatesForOrientation(
             orientation,
             bottomLeftAreaCorner,

@@ -29,7 +29,7 @@ public class CorridorGenerator : MonoBehaviour
                 node.ChildrenNodeList[0],
                 node.ChildrenNodeList[1],
                 corridorWidth);
-
+            
             GenerateCorridor(corridor);
             
             corridorList.Add(corridor);
