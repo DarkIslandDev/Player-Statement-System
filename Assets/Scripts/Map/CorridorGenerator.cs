@@ -5,33 +5,45 @@ using UnityEngine;
 
 public class CorridorGenerator : MonoBehaviour
 {
-    public List<Orientation> Orientations { get; private set; }
+    public List<Orientation> Orientations { get; private set; } = new();
+
+    public List<PassageOrientation> GetPassageSides(RoomNode node)
+    {
+        List<PassageOrientation> passageSides = new List<PassageOrientation>();
+
+        // foreach (var VARIABLE in COLLECTION)
+        // {
+        //     
+        // }
+
+        return passageSides;
+    }
 
     public List<CorridorNode> CreateCorridor(List<RoomNode> allNodesCollection, int corridorWidth)
     {
         Orientations = new List<Orientation>();
-        
+
         List<CorridorNode> corridorList = new List<CorridorNode>();
-        Queue<RoomNode> structuresToCheck = 
+        Queue<RoomNode> structuresToCheck =
             new Queue<RoomNode>(
                 allNodesCollection
                     .OrderByDescending(node => node.TreeLayerIndex)
                     .ToList()
-                );
+            );
 
         while (structuresToCheck.Count > 0)
         {
             RoomNode node = structuresToCheck.Dequeue();
-            
+
             if (node.ChildrenNodeList.Count == 0) continue;
 
             CorridorNode corridor = new CorridorNode(
                 node.ChildrenNodeList[0],
                 node.ChildrenNodeList[1],
                 corridorWidth);
-            
+
             GenerateCorridor(corridor);
-            
+
             corridorList.Add(corridor);
         }
 
@@ -59,8 +71,17 @@ public class CorridorGenerator : MonoBehaviour
             default:
                 throw new ArgumentOutOfRangeException();
         }
-        
+
         corridor.SetOrientationForDoor(relativePosition);
         Orientations.Add(corridor.Orientation);
     }
+}
+
+public enum PassageOrientation
+{
+    None,
+    Top,
+    Bottom,
+    Left,
+    Right
 }

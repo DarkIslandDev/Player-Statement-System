@@ -36,7 +36,7 @@ public class Generator : MonoBehaviour
         corridorList = new List<CorridorNode>();
 
         binarySpacePartitioner.Init(dungeonWidth, dungeonLength);
-        allRoomsCollection = binarySpacePartitioner.PrepareNodesCollection(maxIterations, roomWidthMin, roomLengthMin);
+        allRoomsCollection = binarySpacePartitioner.PrepareRoomNodesCollection(maxIterations, roomWidthMin, roomLengthMin);
         List<Node> roomSpaces = StructureHelper.TraverseGraphToExtractLowestLeafes(binarySpacePartitioner.RoomNode);
         
         roomList = roomGenerator.GenerateRoomsInGivenSpaces(

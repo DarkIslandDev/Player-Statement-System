@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 
-[SerializeField]
 public enum RoomType
 {
     Default,
@@ -8,6 +7,7 @@ public enum RoomType
     MonsterRoom,
     BossRoom
 }
+
 public class RoomNode : Node
 {
     [SerializeField] protected bool spawnNode;
@@ -25,7 +25,9 @@ public class RoomNode : Node
         set => roomType = value;
     }
 
-    public RoomNode() :base(null) { } 
+    public RoomNode() : base(null)
+    {
+    }
 
     public RoomNode(Vector2Int bottomLeftAreaCorner, Vector2Int topRightAreaCorner, Node parentNode, int index) :
         base(parentNode)
@@ -36,6 +38,14 @@ public class RoomNode : Node
         TopLeftAreaCorner = new Vector2Int(bottomLeftAreaCorner.x, topRightAreaCorner.y);
         TreeLayerIndex = index;
     }
-    
-    
+
+    public void RoomInit(Vector2Int bottomLeftAreaCorner, Vector2Int topRightAreaCorner, Node parentNode, int index)
+    {
+        Init(parentNode);
+        BottomLeftAreaCorner = bottomLeftAreaCorner;
+        TopRightAreaCorner = topRightAreaCorner;
+        BottomRightAreaCorner = new Vector2Int(topRightAreaCorner.x, bottomLeftAreaCorner.y);
+        TopLeftAreaCorner = new Vector2Int(bottomLeftAreaCorner.x, topRightAreaCorner.y);
+        TreeLayerIndex = index;
+    }
 }

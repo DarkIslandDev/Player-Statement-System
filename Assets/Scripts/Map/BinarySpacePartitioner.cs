@@ -15,7 +15,7 @@ public class BinarySpacePartitioner : MonoBehaviour
             new Vector2Int(dungeonWidth, dungeonHeight), null, 0);
     }
 
-    public List<RoomNode> PrepareNodesCollection(int maxIterations, int roomWidthMin, int roomLengthMin)
+    public List<RoomNode> PrepareRoomNodesCollection(int maxIterations, int roomWidthMin, int roomLengthMin)
     {
         Queue<RoomNode> graph = new Queue<RoomNode>();
         List<RoomNode> listToReturn = new List<RoomNode>();

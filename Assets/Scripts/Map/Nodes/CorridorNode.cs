@@ -31,6 +31,14 @@ public class CorridorNode : Node
         this.corridorWidth = corridorWidth;
     }
 
+    public void CorridorInit(Node node1, Node node2, int corridorWidth)
+    {
+        structure1 = node1;
+        structure2 = node2;
+        this.corridorWidth = corridorWidth;
+        Init(null);
+    }
+
     public void SetOrientationForDoor(RelativePosition relativePosition)
     {
         orientation = relativePosition is RelativePosition.Down or RelativePosition.Up

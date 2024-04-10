@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public abstract class Node : MonoBehaviour
 {
@@ -12,15 +11,25 @@ public abstract class Node : MonoBehaviour
     [SerializeField] protected GameObject leftWalls;
     [SerializeField] protected GameObject rightWalls;
     [SerializeField] protected List<GameObject> walls;
-    [SerializeField] protected bool doorTopSide;
+    [Space] [SerializeField] protected List<GameObject> topWallsArray;
+    [SerializeField] protected List<GameObject> bottomWallsArray;
+    [SerializeField] protected List<GameObject> leftWallsArray;
+    [SerializeField] protected List<GameObject> rightWallsArray;
+    [Space] [SerializeField] protected bool doorTopSide;
     [SerializeField] protected bool doorBottomSide;
     [SerializeField] protected bool doorLeftSide;
     [SerializeField] protected bool doorRightSide;
-    
+
     private List<Node> childrenNodeList;
 
-    public Box NodeBounds { get => nodeBounds; set => nodeBounds = value; }
+    public Box NodeBounds
+    {
+        get => nodeBounds;
+        set => nodeBounds = value;
+    }
+
     public List<Node> ChildrenNodeList => childrenNodeList;
+
     public GameObject RoomWalls
     {
         get => roomWalls;
@@ -57,6 +66,30 @@ public abstract class Node : MonoBehaviour
         set => doorRightSide = value;
     }
 
+    public List<GameObject> TopWallsArray
+    {
+        get => topWallsArray;
+        set => topWallsArray = value;
+    }
+
+    public List<GameObject> BottomWallsArray
+    {
+        get => bottomWallsArray;
+        set => bottomWallsArray = value;
+    }
+
+    public List<GameObject> LeftWallsArray
+    {
+        get => leftWallsArray;
+        set => leftWallsArray = value;
+    }
+
+    public List<GameObject> RightWallsArray
+    {
+        get => rightWallsArray;
+        set => rightWallsArray = value;
+    }
+
     public Vector2Int BottomLeftAreaCorner { get; set; }
     public Vector2Int BottomRightAreaCorner { get; set; }
     public Vector2Int TopRightAreaCorner { get; set; }
@@ -69,9 +102,15 @@ public abstract class Node : MonoBehaviour
     public int Length => (TopRightAreaCorner.y - BottomLeftAreaCorner.y);
     public Node Parent { get; set; }
     public int TreeLayerIndex { get; protected set; }
-    public bool Visited { get => visited; set => visited = value; }
+
+    public bool Visited
+    {
+        get => visited;
+        set => visited = value;
+    }
+
     public MeshCollider MeshCollider { get; set; }
-    
+
     public GameObject TopWalls
     {
         get => topWalls;
@@ -97,6 +136,13 @@ public abstract class Node : MonoBehaviour
     }
 
     protected Node(Node parentNode)
+    {
+        childrenNodeList = new List<Node>();
+        Parent = parentNode;
+        parentNode?.AddChild(this);
+    }
+
+    public virtual void Init(Node parentNode)
     {
         childrenNodeList = new List<Node>();
         Parent = parentNode;

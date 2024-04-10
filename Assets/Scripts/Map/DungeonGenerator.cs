@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.Mathematics;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -140,7 +139,7 @@ public class DungeonGenerator : MonoBehaviour
         CreateRoomAndCorridors();
         CreateWalls();
         CreateDoorInCorridor();
-
+        
         // CreatePillars();
         CreateTorches();
     }
@@ -172,6 +171,8 @@ public class DungeonGenerator : MonoBehaviour
 
         CreateWallsOfType(prefabs.wallHorizontal, possibleWallHorizontalPosition, wallPositionToGameObject);
         CreateWallsOfType(prefabs.wallVertical, possibleWallVerticalPosition, wallPositionToGameObject);
+        
+        FindEmptyChildObjects();
     }
 
     private void CreateWallsOfType(GameObject wallPrefab, List<Vector3> possibleWallPositions,
@@ -189,7 +190,7 @@ public class DungeonGenerator : MonoBehaviour
     private GameObject CreateWall(GameObject wallPrefab, GameObject wallParent, Vector3 wallPosition)
     {
         GameObject wall = Instantiate(wallPrefab, wallPosition, wallPrefab.transform.rotation, wallParent.transform);
-     
+
         return wall;
     }
 
@@ -257,7 +258,7 @@ public class DungeonGenerator : MonoBehaviour
             //         // Debug.Log(topWallTransform);
             //     }
             // }
-            
+
             // Vector3 bottomCenter = new Vector3(room.BottomCenterArea.x, 1, room.BottomCenterArea.y);
             // Vector3 topCenter = new Vector3(room.TopCenterArea.x, 1, room.TopCenterArea.y);
             // Vector3 LeftCenter = new Vector3(room.LeftCenterArea.x, 1, room.LeftCenterArea.y);
@@ -302,21 +303,21 @@ public class DungeonGenerator : MonoBehaviour
     private void CreateTorch(GameObject parentObject, GameObject wallsParentObject)
     {
         List<Transform> walls = new List<Transform>();
-        
-        foreach (Transform wall in wallsParentObject.transform)
-        {
-            walls.Add(wall);
 
-            int rand = Random.Range(1, walls.Count - 1);
-            Debug.Log(rand);
-            float x = walls[rand].transform.position.x;
-            float y = 1f;
-            float z = walls[rand].transform.position.z;
-            Vector3 torchPosition = new Vector3(x, y, z);
-            Quaternion torchRotation = walls[rand].transform.localRotation;
-                
-            GameObject torch = CreateObject(prefabs.torch, parentObject, torchPosition, torchRotation);
-        }
+        // foreach (Transform wall in wallsParentObject.transform)
+        // {
+        //     walls.Add(wall);
+        //
+        //     int rand = Random.Range(1, walls.Count - 1);
+        //     Debug.Log(rand);
+        //     float x = walls[rand].transform.position.x;
+        //     float y = 1f;
+        //     float z = walls[rand].transform.position.z;
+        //     Vector3 torchPosition = new Vector3(x, y, z);
+        //     Quaternion torchRotation = walls[rand].transform.localRotation;
+        //         
+        //     GameObject torch = CreateObject(prefabs.torch, parentObject, torchPosition, torchRotation);
+        // }
     }
 
     private void CreateObjectsToRoom()
@@ -365,7 +366,7 @@ public class DungeonGenerator : MonoBehaviour
     private void CollectAllAddedNodes(Vector2 topRight, Vector2 bottomLeft, GameObject dungeonFloor, Mesh mesh)
     {
         Node node = null;
-        
+
         node = AddRoomNodes(bottomLeft, dungeonFloor, null);
 
         node = AddCorridorNodes(bottomLeft, dungeonFloor, node);
@@ -386,52 +387,38 @@ public class DungeonGenerator : MonoBehaviour
             dungeonFloor.name += $" | {node.NodeBounds.Position.x} / {node.NodeBounds.Position.z}";
             mesh.name = node.name;
 
-            GameObject roomWalls = new GameObject("RoomWalls");
-            roomWalls.transform.SetParent(node.transform);
+            GameObject roomWalls = CreateWallsParentObject(node.transform, "RoomWalls");
             node.RoomWalls = roomWalls;
-
-            GameObject topWalls = new GameObject("TopRoomWalls");
-            topWalls.transform.SetParent(roomWalls.transform);
-            // CreateTorch(topWalls, topWalls);
+            GameObject topWalls = CreateWallsParentObject(roomWalls.transform, "TopRoomWalls");
             node.TopWalls = topWalls;
-
-            GameObject bottomWalls = new GameObject("BottomRoomWalls");
-            bottomWalls.transform.SetParent(roomWalls.transform);
-            // CreateTorch(bottomWalls, bottomWalls);
+            GameObject bottomWalls = CreateWallsParentObject(roomWalls.transform, "BottomRoomWalls");
             node.BottomWalls = bottomWalls;
-
-            GameObject leftWalls = new GameObject("LeftRoomWalls");
-            leftWalls.transform.SetParent(roomWalls.transform);
-            // CreateTorch(leftWalls, leftWalls);
+            GameObject leftWalls = CreateWallsParentObject(roomWalls.transform, "LeftRoomWalls");
             node.LeftWalls = leftWalls;
-
-            GameObject rightWalls = new GameObject("RightRoomWalls");
-            rightWalls.transform.SetParent(roomWalls.transform);
-            // CreateTorch(rightWalls, rightWalls);
+            GameObject rightWalls = CreateWallsParentObject(roomWalls.transform, "RightRoomWalls");
             node.RightWalls = rightWalls;
 
-            Vector3 bottomLeftV = new Vector3(bottomLeft.x, 0, bottomLeft.y);
-            Vector3 bottomRightV = new Vector3(topRight.x, 0, bottomLeft.y);
-            Vector3 topLeftV = new Vector3(bottomLeft.x, 0, topRight.y);
-            Vector3 topRightV = new Vector3(topRight.x, 0, topRight.y);
-
-            AddWallsPositionToFloor(
-                bottomLeftV,
-                bottomRightV,
-                topLeftV,
-                topRightV,
-                topWalls,
-                bottomWalls,
-                rightWalls,
-                leftWalls);
+            AddWallsPositionToFloor(topRight, bottomLeft, topWalls, bottomWalls, rightWalls, leftWalls);
 
             node.Walls = new List<GameObject>();
+            node.TopWallsArray = new List<GameObject>();
+            node.BottomWallsArray = new List<GameObject>();
+            node.LeftWallsArray = new List<GameObject>();
+            node.RightWallsArray = new List<GameObject>();
 
-            FindEmptyObjects(topWalls, node, node.DoorTopSide);
-            FindEmptyObjects(bottomWalls, node, node.DoorBottomSide);
-            FindEmptyObjects(leftWalls, node, node.DoorLeftSide);
-            FindEmptyObjects(rightWalls, node, node.DoorRightSide);
+            node.TopWallsArray = FindEmptyObjects(topWalls, node, node.DoorTopSide);
+            node.BottomWallsArray = FindEmptyObjects(bottomWalls, node, node.DoorBottomSide);
+            node.LeftWallsArray = FindEmptyObjects(leftWalls, node, node.DoorLeftSide);
+            node.RightWallsArray = FindEmptyObjects(rightWalls, node, node.DoorRightSide);
         }
+    }
+
+    private GameObject CreateWallsParentObject(Transform parent, string objectName)
+    {
+        GameObject wallsParentObject = new GameObject(objectName);
+        wallsParentObject.transform.SetParent(parent);
+
+        return wallsParentObject;
     }
 
     private Node AddRoomNodes(Vector2 bottomLeftCorner, GameObject dungeonFloor, Node node)
@@ -458,7 +445,7 @@ public class DungeonGenerator : MonoBehaviour
                 rooms.Add(roomNode);
             }
         }
-        
+
         return node;
     }
 
@@ -489,7 +476,27 @@ public class DungeonGenerator : MonoBehaviour
         return node;
     }
 
-    private void AddWallsPositionToFloor(Vector3 bottomLeftV, Vector3 bottomRightV, Vector3 topLeftV,
+    private void AddWallsPositionToFloor(Vector2 topRight, Vector2 bottomLeft, GameObject topWalls,
+        GameObject bottomWalls,
+        GameObject rightWalls, GameObject leftWalls)
+    {
+        Vector3 bottomLeftV = new Vector3(bottomLeft.x, 0, bottomLeft.y);
+        Vector3 bottomRightV = new Vector3(topRight.x, 0, bottomLeft.y);
+        Vector3 topLeftV = new Vector3(bottomLeft.x, 0, topRight.y);
+        Vector3 topRightV = new Vector3(topRight.x, 0, topRight.y);
+
+        AddWallsPosition(
+            bottomLeftV,
+            bottomRightV,
+            topLeftV,
+            topRightV,
+            topWalls,
+            bottomWalls,
+            rightWalls,
+            leftWalls);
+    }
+
+    private void AddWallsPosition(Vector3 bottomLeftV, Vector3 bottomRightV, Vector3 topLeftV,
         Vector3 topRightV, GameObject topParentGame, GameObject bottomParentGame, GameObject rightParentGame,
         GameObject leftParentGame)
     {
@@ -647,36 +654,56 @@ public class DungeonGenerator : MonoBehaviour
         }
     }
 
-    private void FindEmptyObjects(GameObject transformObject, Node node, bool side)
+    private List<GameObject> FindEmptyObjects(GameObject transformObject, Node node, bool side)
     {
+        List<GameObject> childTransforms = new List<GameObject>();
+        
         foreach (Transform child in transformObject.transform)
         {
-            List<GameObject> emptyObjects = new List<GameObject>();
-            FindEmptyChildObjects(child, emptyObjects);
+            childTransforms.Add(child.gameObject);
 
-            if (emptyObjects.Count >= 1)
-            {
-                side = true;
-            }
-            
             node.Walls.Add(child.gameObject);
         }
+
+        return childTransforms;
     }
 
-    private void FindEmptyChildObjects(Transform parent, List<GameObject> emptyObjects)
+    private void FindEmptyChildObjects()
     {
-        foreach (Transform child in parent)
+        for (int i = 0; i < rooms.Count; i++)
         {
-            if (child.childCount == 0)
+            foreach (Transform child in rooms[i].TopWalls.transform)
             {
-                emptyObjects.Add(child.gameObject);
-            }
-            else
-            {
-                FindEmptyChildObjects(child, emptyObjects); // Рекурсивно вызываем функцию для обхода всех дочерних объектов
+                int j = child.Cast<Transform>().Count(grandChild => grandChild.childCount == 0);
+
+                if (j == 6)
+                {
+                    nodes[i].DoorTopSide = true;
+                }
             }
         }
     }
+
+    // private List<GameObject> FindEmptyChildObjects(Transform parent, List<GameObject> emptyObjects)
+    // {
+    //     List<GameObject> childTransforms = new List<GameObject>();
+    //     foreach (Transform child in parent)
+    //     {
+    //         childTransforms.Add(child.gameObject);
+    //     
+    //         if (child.childCount == 6)
+    //         {
+    //             emptyObjects.Add(child.gameObject);
+    //         }
+    //         else
+    //         {
+    //             FindEmptyChildObjects(child,
+    //                 emptyObjects); // Рекурсивно вызываем функцию для обхода всех дочерних объектов
+    //         }
+    //     }
+    //     
+    //     return childTransforms;
+    // }
 
     #endregion
 }
