@@ -5,14 +5,16 @@ public enum RoomType
     Default,
     SafeRoom,
     MonsterRoom,
-    BossRoom
+    BossRoom,
+    TreasureRoom,
+    MerchantsRoom
 }
 
 public class RoomNode : Node
 {
+    protected GameObject torchParent;
     [SerializeField] protected bool spawnNode;
     [SerializeField] protected RoomType roomType;
-    [SerializeField] protected GameObject torchParent;
 
     public bool SpawnNode
     {

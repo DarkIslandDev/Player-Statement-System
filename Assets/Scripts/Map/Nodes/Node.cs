@@ -3,22 +3,28 @@ using UnityEngine;
 
 public abstract class Node : MonoBehaviour
 {
+    [Header("Room Visited Check")]
     [SerializeField] protected bool visited;
+    [Header("Node Bounds")]
     [SerializeField] protected Box nodeBounds;
-    [SerializeField] protected GameObject roomWalls;
-    [SerializeField] protected GameObject topWalls;
-    [SerializeField] protected GameObject bottomWalls;
-    [SerializeField] protected GameObject leftWalls;
-    [SerializeField] protected GameObject rightWalls;
-    [SerializeField] protected List<GameObject> walls;
-    [Space] [SerializeField] protected List<GameObject> topWallsArray;
-    [SerializeField] protected List<GameObject> bottomWallsArray;
-    [SerializeField] protected List<GameObject> leftWallsArray;
-    [SerializeField] protected List<GameObject> rightWallsArray;
-    [Space] [SerializeField] protected bool doorTopSide;
+    [Space]
+    [Header("Entrance Value")]
+    [SerializeField] protected bool doorTopSide;
     [SerializeField] protected bool doorBottomSide;
     [SerializeField] protected bool doorLeftSide;
     [SerializeField] protected bool doorRightSide;
+    [Space]
+    protected GameObject roomWalls;
+    protected GameObject topWalls;
+    protected GameObject bottomWalls;
+    protected GameObject leftWalls;
+    protected GameObject rightWalls;
+    protected List<GameObject> walls;
+    protected List<GameObject> topWallsArray;
+    protected List<GameObject> bottomWallsArray;
+    protected List<GameObject> leftWallsArray;
+    protected List<GameObject> rightWallsArray;
+    
 
     private List<Node> childrenNodeList;
 
