@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class Generator : MonoBehaviour
 {
-    private List<RoomNode> allRoomsCollection = new List<RoomNode>();
-    private List<RoomNode> roomList = new List<RoomNode>();
-    private List<CorridorNode> corridorList = new List<CorridorNode>();
+    [SerializeField] private List<RoomNode> allRoomsCollection = new List<RoomNode>();
+    [SerializeField] private List<RoomNode> roomList = new List<RoomNode>();
+    [SerializeField] private List<CorridorNode> corridorList = new List<CorridorNode>();
     private int dungeonWidth;
     private int dungeonLength;
 
@@ -29,24 +29,24 @@ public class Generator : MonoBehaviour
         this.dungeonLength = dungeonLength;
     }
 
-    public List<Node> CalculateDungeon(int maxIterations, int roomWidthMin, int roomLengthMin, int corridorWidth,
-        float roomBottomCornerModifier, float roomTopCornerModifier, int roomOffset)
-    {
-        roomList = new List<RoomNode>();
-        corridorList = new List<CorridorNode>();
-
-        binarySpacePartitioner.Init(dungeonWidth, dungeonLength);
-        allRoomsCollection = binarySpacePartitioner.PrepareRoomNodesCollection(maxIterations, roomWidthMin, roomLengthMin);
-        List<Node> roomSpaces = StructureHelper.TraverseGraphToExtractLowestLeafes(binarySpacePartitioner.RoomNode);
-        
-        roomList = roomGenerator.GenerateRoomsInGivenSpaces(
-            roomSpaces,
-            roomBottomCornerModifier,
-            roomTopCornerModifier,
-            roomOffset);
-
-        corridorList = corridorGenerator.CreateCorridor(allRoomsCollection, corridorWidth);
-
-        return new List<Node>(roomList).Concat(corridorList).ToList();
-    }
+    // public List<Node> CalculateDungeon(int maxIterations, int roomWidthMin, int roomLengthMin, int corridorWidth,
+    //     float roomBottomCornerModifier, float roomTopCornerModifier, int roomOffset)
+    // {
+    //     roomList = new List<RoomNode>();
+    //     corridorList = new List<CorridorNode>();
+    //
+    //     binarySpacePartitioner.Init(dungeonWidth, dungeonLength);
+    //     allRoomsCollection = binarySpacePartitioner.PrepareRoomNodesCollection(maxIterations, roomWidthMin, roomLengthMin);
+    //     List<Node> roomSpaces = StructureHelper.TraverseGraphToExtractLowestLeafes(binarySpacePartitioner.RoomNode);
+    //     
+    //     roomList = roomGenerator.GenerateRoomsInGivenSpaces(
+    //         roomSpaces,
+    //         roomBottomCornerModifier,
+    //         roomTopCornerModifier,
+    //         roomOffset);
+    //
+    //     corridorList = corridorGenerator.CreateCorridor(allRoomsCollection, corridorWidth);
+    //
+    //     return new List<Node>(roomList).Concat(corridorList).ToList();
+    // }
 }

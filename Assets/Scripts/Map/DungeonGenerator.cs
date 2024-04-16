@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -53,6 +54,7 @@ public class Components
 
 public class DungeonGenerator : MonoBehaviour
 {
+    private List<Node> allRoomsCollection = new List<Node>();
     [Space] [SerializeField] private List<RoomNode> rooms = new List<RoomNode>();
     [Space] [SerializeField] private List<CorridorNode> corridors = new List<CorridorNode>();
 
@@ -89,9 +91,27 @@ public class DungeonGenerator : MonoBehaviour
     private GameObject corridorsParent;
     private GameObject wallsParent;
 
+    public GameObject RoomsParent
+    {
+        get => roomsParent;
+        set => roomsParent = value;
+    }
+
+    public GameObject CorridorsParent
+    {
+        get => corridorsParent;
+        set => corridorsParent = value;
+    }
+
+    // public List<Node> AllRoomsCollection
+    // {
+    //     get => allRoomsCollection;
+    //     set => allRoomsCollection = value;
+    // }
+
     private void Awake()
     {
-        if (Instance == null)
+        if (!Instance)
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
@@ -117,130 +137,69 @@ public class DungeonGenerator : MonoBehaviour
 
         CreateParentObjects();
 
+        allRoomsCollection = new List<Node>();
         rooms = new List<RoomNode>();
         corridors = new List<CorridorNode>();
 
-        components.generator.Init(
-            components.roomGenerator,
-            components.corridorGenerator,
-            components.binarySpacePartitioner,
-            values.dungeonWidth,
-            values.dungeonLength);
+        CreateBaseDungeon();
 
-        nodes = components.generator.CalculateDungeon(
-            values.maxIterations,
-            values.roomWidthMin,
-            values.roomLengthMin,
-            values.corridorWidth,
+        CreateAdditionalObjectsInDungeon();
+    }
+
+    private void CreateBaseDungeon()
+    {
+        components.binarySpacePartitioner.Init(
+            values.dungeonWidth,
+            values.dungeonLength
+        );
+
+        allRoomsCollection.AddRange(
+            components.binarySpacePartitioner.PrepareRoomNodesCollection(
+                values.maxIterations,
+                values.roomWidthMin,
+                values.roomLengthMin
+            ));
+
+        components.roomGenerator.CalculateRooms(
+            possibleWallHorizontalPosition,
+            possibleDoorHorizontalPosition,
+            possibleWallVerticalPosition,
+            possibleDoorVerticalPosition,
             modifiers.roomBottomCornerModifier,
             modifiers.roomTopCornerModifier,
             modifiers.roomOffset);
 
-        CreateRoomAndCorridors();
-        CreateWalls();
-        CreateDoorInCorridor();
-        
-        // CreatePillars();
-        CreateTorches();
+        components.corridorGenerator.CalculateCorridor(
+            possibleWallHorizontalPosition,
+            possibleDoorHorizontalPosition,
+            possibleWallVerticalPosition,
+            possibleDoorVerticalPosition,
+            allRoomsCollection,
+            prefabs.door);
     }
-
-    private void CreateRoomAndCorridors()
-    {
-        for (int i = 0; i < nodes.Count; i++)
-        {
-            CreateMesh(nodes[i].BottomLeftAreaCorner, nodes[i].TopRightAreaCorner);
-        }
-    }
-
-    private void CreateWalls()
+    
+    private void CreateAdditionalObjectsInDungeon()
     {
         nodes = new List<Node>();
         nodes.AddRange(rooms);
         nodes.AddRange(corridors);
 
-        Dictionary<Vector3, GameObject> wallPositionToGameObject = new Dictionary<Vector3, GameObject>();
+        ObjectCreator.CreateWalls(
+            nodes,
+            prefabs.wallHorizontal,
+            prefabs.wallVertical,
+            possibleWallHorizontalPosition,
+            possibleWallVerticalPosition);
 
-        foreach (Node node in nodes)
+        for (int i = 0; i < rooms.Count; i++)
         {
-            foreach (GameObject wall in node.Walls)
-            {
-                Vector3 wallPosition = wall.transform.position;
-                wallPositionToGameObject[wallPosition] = wall;
-            }
+            CheckPassages(nodes[i]);
+            // FindEmptyChildObject(rooms[i]);
         }
 
-        CreateWallsOfType(prefabs.wallHorizontal, possibleWallHorizontalPosition, wallPositionToGameObject);
-        CreateWallsOfType(prefabs.wallVertical, possibleWallVerticalPosition, wallPositionToGameObject);
-        
-        FindEmptyChildObjects();
-    }
+        ObjectCreator.CreatePillars(rooms, prefabs.pillar);
+        ObjectCreator.CreateTorches(rooms, prefabs.torch);
 
-    private void CreateWallsOfType(GameObject wallPrefab, List<Vector3> possibleWallPositions,
-        Dictionary<Vector3, GameObject> wallPositionToGameObject)
-    {
-        foreach (Vector3 wallPosition in possibleWallPositions)
-        {
-            if (wallPositionToGameObject.TryGetValue(wallPosition, out GameObject value))
-            {
-                CreateWall(wallPrefab, value, wallPosition);
-            }
-        }
-    }
-
-    private GameObject CreateWall(GameObject wallPrefab, GameObject wallParent, Vector3 wallPosition)
-    {
-        GameObject wall = Instantiate(wallPrefab, wallPosition, wallPrefab.transform.rotation, wallParent.transform);
-
-        return wall;
-    }
-
-    private void CreateDoorInCorridor()
-    {
-        foreach (CorridorNode corridor in corridors)
-        {
-            GameObject door = CreateObject(
-                prefabs.door,
-                corridor.gameObject,
-                corridor.NodeBounds.Position,
-                prefabs.door.transform.localRotation = corridor.Orientation == Orientation.Vertical
-                    ? Quaternion.Euler(0, 90, 0)
-                    : Quaternion.identity);
-        }
-    }
-
-    private void CreatePillars()
-    {
-        foreach (RoomNode room in rooms)
-        {
-            if (room.NodeBounds.Size is { x: >= 12, z: >= 12 })
-            {
-                Vector3 leftBottomCorner =
-                    new Vector3(room.BottomLeftAreaCorner.x + 1, 0, room.BottomLeftAreaCorner.y + 1);
-                Vector3 rightBottomCorner =
-                    new Vector3(room.BottomRightAreaCorner.x - 1, 0, room.BottomRightAreaCorner.y + 1);
-                Vector3 leftTopCorner =
-                    new Vector3(room.TopLeftAreaCorner.x + 1, 0, room.TopLeftAreaCorner.y - 1);
-                Vector3 rightTopCorner =
-                    new Vector3(room.TopRightAreaCorner.x - 1, 0, room.TopRightAreaCorner.y - 1);
-
-                List<Vector3> positions = new List<Vector3>()
-                {
-                    leftBottomCorner,
-                    rightBottomCorner,
-                    leftTopCorner,
-                    rightTopCorner
-                };
-
-                for (int i = 0; i < positions.Count; i++)
-                {
-                    GameObject pillar = CreateObject(
-                        prefabs.pillar,
-                        room.gameObject,
-                        positions[i],
-                        Quaternion.identity);
-                }
-            }
-        }
     }
 
     private void CreateTorches()
@@ -320,16 +279,17 @@ public class DungeonGenerator : MonoBehaviour
         // }
     }
 
-    private void CreateObjectsToRoom()
+    private void CheckPassages(Node node)
     {
+        if (HasPassage(node.TopWalls)) node.DoorTopSide = true;
+        if (HasPassage(node.BottomWalls)) node.DoorBottomSide = true;
+        if (HasPassage(node.RightWalls)) node.DoorRightSide = true;
+        if (HasPassage(node.LeftWalls)) node.DoorLeftSide = true;
     }
-
-    private GameObject CreateObject(GameObject prefab, GameObject parent, Vector3 position, Quaternion rotation)
+    
+    private bool HasPassage(GameObject wallsParent)
     {
-        GameObject createdObject = Instantiate(prefab, position, rotation, parent.transform);
-        // createdObject.GetComponentInChildren<MeshRenderer>().material = material;
-
-        return createdObject;
+        return wallsParent.transform.Cast<Transform>().Any(child => child.CompareTag("Untagged"));
     }
 
     private void CreateMesh(Vector2 bottomLeftCorner, Vector2 topRightCorner)
@@ -362,6 +322,7 @@ public class DungeonGenerator : MonoBehaviour
     }
 
     #endregion
+
 
     private void CollectAllAddedNodes(Vector2 topRight, Vector2 bottomLeft, GameObject dungeonFloor, Mesh mesh)
     {
@@ -497,8 +458,9 @@ public class DungeonGenerator : MonoBehaviour
     }
 
     private void AddWallsPosition(Vector3 bottomLeftV, Vector3 bottomRightV, Vector3 topLeftV,
-        Vector3 topRightV, GameObject topParentGame, GameObject bottomParentGame, GameObject rightParentGame,
-        GameObject leftParentGame)
+        Vector3 topRightV, GameObject topParentGameObject, GameObject bottomParentGameObject,
+        GameObject rightParentGameObject,
+        GameObject leftParentGameObject)
     {
         Vector3 wallPosition = Vector3.zero;
 
@@ -509,7 +471,7 @@ public class DungeonGenerator : MonoBehaviour
                 wallPosition,
                 possibleWallHorizontalPosition,
                 possibleDoorHorizontalPosition,
-                bottomParentGame);
+                bottomParentGameObject);
         }
 
         for (int row = (int)topLeftV.x; row < (int)topRightV.x; row++)
@@ -519,7 +481,7 @@ public class DungeonGenerator : MonoBehaviour
                 wallPosition,
                 possibleWallHorizontalPosition,
                 possibleDoorHorizontalPosition,
-                topParentGame);
+                topParentGameObject);
         }
 
         for (int col = (int)bottomLeftV.z; col < (int)topLeftV.z; col++)
@@ -529,7 +491,7 @@ public class DungeonGenerator : MonoBehaviour
                 wallPosition,
                 possibleWallVerticalPosition,
                 possibleDoorVerticalPosition,
-                leftParentGame);
+                leftParentGameObject);
         }
 
         for (int col = (int)bottomRightV.z; col < (int)topRightV.z; col++)
@@ -539,7 +501,7 @@ public class DungeonGenerator : MonoBehaviour
                 wallPosition,
                 possibleWallVerticalPosition,
                 possibleDoorVerticalPosition,
-                rightParentGame);
+                rightParentGameObject);
         }
     }
 
@@ -564,7 +526,7 @@ public class DungeonGenerator : MonoBehaviour
 
     #region AdditionalCode
 
-    private Box CalculateBounds(Mesh mesh)
+    public Box CalculateBounds(Mesh mesh)
     {
         Vector3 min = new Vector3(
             mesh.bounds.min.x,
@@ -636,8 +598,10 @@ public class DungeonGenerator : MonoBehaviour
 
     public void ResetDungeon()
     {
+        allRoomsCollection.Clear();
         rooms.Clear();
         corridors.Clear();
+        components.roomGenerator.RoomList.Clear();
 
         nodes = new List<Node>();
         possibleDoorVerticalPosition = new List<Vector3>();
@@ -657,7 +621,7 @@ public class DungeonGenerator : MonoBehaviour
     private List<GameObject> FindEmptyObjects(GameObject transformObject, Node node, bool side)
     {
         List<GameObject> childTransforms = new List<GameObject>();
-        
+
         foreach (Transform child in transformObject.transform)
         {
             childTransforms.Add(child.gameObject);

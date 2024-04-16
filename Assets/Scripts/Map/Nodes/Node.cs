@@ -142,7 +142,7 @@ public abstract class Node : MonoBehaviour
         parentNode?.AddChild(this);
     }
 
-    public virtual void Init(Node parentNode)
+    protected void Init(Node parentNode)
     {
         childrenNodeList = new List<Node>();
         Parent = parentNode;

@@ -12,6 +12,7 @@ public class RoomNode : Node
 {
     [SerializeField] protected bool spawnNode;
     [SerializeField] protected RoomType roomType;
+    [SerializeField] protected GameObject torchParent;
 
     public bool SpawnNode
     {
@@ -23,6 +24,12 @@ public class RoomNode : Node
     {
         get => roomType;
         set => roomType = value;
+    }
+
+    public GameObject TorchParent
+    {
+        get => torchParent;
+        set => torchParent = value;
     }
 
     public RoomNode() : base(null)

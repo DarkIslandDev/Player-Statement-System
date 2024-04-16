@@ -307,4 +307,56 @@ public struct Box : IEquatable<Box>
         {
         }
     }
+    
+    public static Box CalculateBounds(Mesh mesh)
+    {
+        Vector3 min = new Vector3(
+            mesh.bounds.min.x,
+            mesh.bounds.min.y,
+            mesh.bounds.min.z);
+
+        Vector3 max = new Vector3(
+            mesh.bounds.max.x,
+            mesh.bounds.max.y,
+            mesh.bounds.max.z);
+
+        Vector3 position = new Vector3(
+            mesh.bounds.center.x,
+            mesh.bounds.center.y,
+            mesh.bounds.center.z);
+
+        Vector3 size = new Vector3(
+            mesh.bounds.size.x,
+            mesh.bounds.size.y,
+            mesh.bounds.size.z);
+
+        float x = position.x;
+        float y = position.y;
+        float z = position.z;
+
+        float xMin = Math.Min(position.x, position.x + size.x);
+        float yMin = Math.Min(position.y, position.y + size.y);
+        float zMin = Math.Min(position.z, position.z + size.z);
+
+        float xMax = Math.Max(position.x, position.x + size.x);
+        float yMax = Math.Max(position.y, position.y + size.y);
+        float zMax = Math.Max(position.z, position.z + size.z);
+
+        return new Box
+        {
+            Position = position,
+            Size = size,
+            x = x,
+            y = y,
+            z = z,
+            Min = min,
+            Max = max,
+            xMin = xMin,
+            yMin = yMin,
+            zMin = zMin,
+            xMax = xMax,
+            yMax = yMax,
+            zMax = zMax
+        };
+    }
 }
