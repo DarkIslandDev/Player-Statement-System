@@ -24,8 +24,8 @@ public abstract class Node : MonoBehaviour
     protected List<GameObject> bottomWallsArray;
     protected List<GameObject> leftWallsArray;
     protected List<GameObject> rightWallsArray;
+    protected Mesh mesh;
     
-
     private List<Node> childrenNodeList;
 
     public Box NodeBounds
@@ -33,21 +33,7 @@ public abstract class Node : MonoBehaviour
         get => nodeBounds;
         set => nodeBounds = value;
     }
-
-    public List<Node> ChildrenNodeList => childrenNodeList;
-
-    public GameObject RoomWalls
-    {
-        get => roomWalls;
-        set => roomWalls = value;
-    }
-
-    public List<GameObject> Walls
-    {
-        get => walls;
-        set => walls = value;
-    }
-
+    
     public bool DoorTopSide
     {
         get => doorTopSide;
@@ -70,6 +56,20 @@ public abstract class Node : MonoBehaviour
     {
         get => doorRightSide;
         set => doorRightSide = value;
+    }
+
+    public List<Node> ChildrenNodeList => childrenNodeList;
+
+    public GameObject RoomWalls
+    {
+        get => roomWalls;
+        set => roomWalls = value;
+    }
+
+    public List<GameObject> Walls
+    {
+        get => walls;
+        set => walls = value;
     }
 
     public List<GameObject> TopWallsArray
@@ -106,7 +106,15 @@ public abstract class Node : MonoBehaviour
     public Vector2Int RightCenterArea { get; set; }
     public int Width => (TopRightAreaCorner.x - BottomLeftAreaCorner.x);
     public int Length => (TopRightAreaCorner.y - BottomLeftAreaCorner.y);
-    public Node Parent { get; set; }
+    public BoxCollider BoxCollider { get; set; }
+
+    public Mesh Mesh
+    {
+        get => mesh;
+        set => mesh = value;
+    }
+    
+    public Node Parent { private get; set; }
     public int TreeLayerIndex { get; protected set; }
 
     public bool Visited
@@ -114,9 +122,7 @@ public abstract class Node : MonoBehaviour
         get => visited;
         set => visited = value;
     }
-
-    public MeshCollider MeshCollider { get; set; }
-
+    
     public GameObject TopWalls
     {
         get => topWalls;
@@ -158,4 +164,16 @@ public abstract class Node : MonoBehaviour
     public void AddChild(Node node) => childrenNodeList.Add(node);
 
     public void RemoveChild(Node node) => childrenNodeList.Remove(node);
+    
+    private void OnTriggerEnter(Collider other)
+    {
+        if (!visited)
+        {
+            if (other.GetComponent<Player>())
+            {
+                visited = true;
+                gameObject.layer = 11;
+            }
+        }
+    }
 }

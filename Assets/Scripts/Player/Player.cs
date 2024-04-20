@@ -1,14 +1,13 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 
 public class Player : MonoBehaviour
 {
     [SerializeField] private PlayerInputHandler playerInputHandler;
     [SerializeField] private PlayerMovement playerMovement;
     [SerializeField] private CameraHandler cameraHandler;
-    // [SerializeField] private SpriteRenderer playerRenderer;
-    // [SerializeField] private Transform shadowTransform;
+    [SerializeField] private Minimap minimap;
     
     public PlayerMovement PlayerMovement => playerMovement;
     public CameraHandler CameraHandler => cameraHandler;
@@ -18,7 +17,7 @@ public class Player : MonoBehaviour
         playerInputHandler = PlayerInputHandler.Instance;
         cameraHandler = CameraHandler.Instance;
         
-        playerMovement = GetComponent<PlayerMovement>();
+        playerMovement ??= GetComponent<PlayerMovement>();
     }
 
     private void Update()
@@ -27,6 +26,7 @@ public class Player : MonoBehaviour
         
         playerMovement.Movement(5);
         
+        minimap.FollowPlayer();
     }
 
     private void FixedUpdate()

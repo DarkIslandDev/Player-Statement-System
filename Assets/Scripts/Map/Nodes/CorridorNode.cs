@@ -22,21 +22,11 @@ public class CorridorNode : Node
     public Node Structure1 => structure1;
     public Node Structure2 => structure2;
     
-    public CorridorNode() : base(null) { }
-
     public CorridorNode(Node node1, Node node2, int corridorWidth) : base(null)
     {
         structure1 = node1;
         structure2 = node2;
         this.corridorWidth = corridorWidth;
-    }
-
-    public void CorridorInit(Node node1, Node node2, int corridorWidth)
-    {
-        structure1 = node1;
-        structure2 = node2;
-        this.corridorWidth = corridorWidth;
-        Init(null);
     }
 
     public void SetOrientationForDoor(RelativePosition relativePosition)
@@ -113,7 +103,7 @@ public class CorridorNode : Node
         if (rightNodeUp.y >= leftNodeUp.y && leftNodeDown.y >= rightNodeDown.y)
         {
             return StructureHelper.CalculateMiddlePoint(
-                leftNodeDown + new Vector2Int(0, modifierDistanceFromWall),
+                leftNodeDown + new Vector2Int(0, modifierDistanceFromWall ),
                 leftNodeUp - new Vector2Int(0, modifierDistanceFromWall + corridorWidth)
             ).y;
         }
@@ -212,7 +202,7 @@ public class CorridorNode : Node
         {
             return StructureHelper.CalculateMiddlePoint(
                 bottomNodeLeft + new Vector2Int(modifierDistanceFromWall, 0),
-                bottomNodeRight - new Vector2Int(this.corridorWidth + modifierDistanceFromWall, 0)
+                bottomNodeRight - new Vector2Int(corridorWidth + modifierDistanceFromWall, 0)
             ).x;
         }
 
@@ -220,7 +210,7 @@ public class CorridorNode : Node
         {
             return StructureHelper.CalculateMiddlePoint(
                 topNodeLeft + new Vector2Int(modifierDistanceFromWall, 0),
-                topNodeRight - new Vector2Int(this.corridorWidth + modifierDistanceFromWall, 0)
+                topNodeRight - new Vector2Int(corridorWidth + modifierDistanceFromWall, 0)
             ).x;
         }
 
@@ -228,7 +218,7 @@ public class CorridorNode : Node
         {
             return StructureHelper.CalculateMiddlePoint(
                 bottomNodeLeft + new Vector2Int(modifierDistanceFromWall, 0),
-                topNodeRight - new Vector2Int(this.corridorWidth + modifierDistanceFromWall, 0)
+                topNodeRight - new Vector2Int(corridorWidth + modifierDistanceFromWall, 0)
             ).x;
         }
 
@@ -236,7 +226,7 @@ public class CorridorNode : Node
         {
             return StructureHelper.CalculateMiddlePoint(
                 topNodeLeft + new Vector2Int(modifierDistanceFromWall, 0),
-                bottomNodeRight - new Vector2Int(this.corridorWidth + modifierDistanceFromWall, 0)
+                bottomNodeRight - new Vector2Int(corridorWidth + modifierDistanceFromWall, 0)
             ).x;
         }
 

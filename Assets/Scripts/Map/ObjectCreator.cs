@@ -30,10 +30,18 @@ public static class ObjectCreator
         dungeonFloor.GetComponent<MeshFilter>().mesh = mesh;
         dungeonFloor.GetComponent<MeshRenderer>().material = meshMaterial;
 
+        BoxCollider boxCollider = dungeonFloor.AddComponent<BoxCollider>();
+        boxCollider.size = new Vector3(mesh.bounds.size.x, 5, mesh.bounds.size.z);
+        boxCollider.center = new Vector3(mesh.bounds.center.x, 2.5f, mesh.bounds.center.z);
+        
+        boxCollider.isTrigger = true;
+
+        dungeonFloor.tag = "Ground";
+        
         return dungeonFloor;
     }
 
-    public static void CreateDoorInCorridor(List<CorridorNode> corridors, GameObject doorPrefab)
+    public static void CreateDoorInCorridor(List<CorridorNode> corridors, GameObject doorPrefab, Material doorMaterial)
     {
         foreach (CorridorNode corridor in corridors)
         {
@@ -43,14 +51,17 @@ public static class ObjectCreator
                 corridor.NodeBounds.Position,
                 doorPrefab.transform.localRotation = corridor.Orientation == Orientation.Vertical
                     ? Quaternion.Euler(0, 90, 0)
-                    : Quaternion.identity);
+                    : Quaternion.identity,
+                doorMaterial);
         }
     }
 
     public static void CreateWalls(List<Node> nodes, GameObject wallHorizontal, GameObject wallVertical,
-        List<Vector3> possibleWallHorizontalPosition, List<Vector3> possibleWallVerticalPosition)
+        Material wallMaterial, List<Vector3> possibleWallHorizontalPosition, List<Vector3> possibleWallVerticalPosition)
     {
         Dictionary<Vector3, GameObject> wallPositionToGameObject = new Dictionary<Vector3, GameObject>();
+
+        List<RoomNode> roomNodes = new List<RoomNode>();
 
         foreach (Node node in nodes)
         {
@@ -61,28 +72,31 @@ public static class ObjectCreator
             }
         }
 
-        CreateWallsOfType(wallHorizontal, possibleWallHorizontalPosition, wallPositionToGameObject);
-        CreateWallsOfType(wallVertical, possibleWallVerticalPosition, wallPositionToGameObject);
+        CreateWallsOfType(wallHorizontal, wallMaterial, possibleWallHorizontalPosition, wallPositionToGameObject);
+        CreateWallsOfType(wallVertical, wallMaterial, possibleWallVerticalPosition, wallPositionToGameObject);
+
 
         FindEmptyChildObjects(nodes);
     }
 
-    private static void CreateWallsOfType(GameObject wallPrefab, List<Vector3> possibleWallPositions,
+    private static void CreateWallsOfType(GameObject wallPrefab, Material wallMaterial,
+        List<Vector3> possibleWallPositions,
         Dictionary<Vector3, GameObject> wallPositionToGameObject)
     {
         foreach (Vector3 wallPosition in possibleWallPositions)
         {
             if (wallPositionToGameObject.TryGetValue(wallPosition, out GameObject value))
             {
-                CreateWall(wallPrefab, value, wallPosition);
+                CreateWall(wallPrefab, value, wallPosition, wallMaterial);
                 value.tag = "Wall";
             }
         }
     }
 
-    private static GameObject CreateWall(GameObject wallPrefab, GameObject wallParent, Vector3 wallPosition)
+    private static GameObject CreateWall(GameObject wallPrefab, GameObject wallParent, Vector3 wallPosition,
+        Material wallMaterial)
     {
-        GameObject wall = CreateObject(wallPrefab, wallParent, wallPosition, Quaternion.identity);
+        GameObject wall = CreateObject(wallPrefab, wallParent, wallPosition, Quaternion.identity, wallMaterial);
 
         return wall;
     }
@@ -111,7 +125,7 @@ public static class ObjectCreator
         }
     }
 
-    public static void CreatePillars(List<RoomNode> rooms, GameObject pillarPrefab)
+    public static void CreatePillars(List<RoomNode> rooms, GameObject pillarPrefab, Material pillarMaterial)
     {
         foreach (RoomNode room in rooms)
         {
@@ -140,13 +154,14 @@ public static class ObjectCreator
                         pillarPrefab,
                         room.gameObject,
                         positions[i],
-                        Quaternion.identity);
+                        Quaternion.identity,
+                        pillarMaterial);
                 }
             }
         }
     }
 
-    public static void CreateTorches(List<RoomNode> rooms, GameObject torchPrefab)
+    public static void CreateTorches(List<RoomNode> rooms, GameObject torchPrefab, Material torchMaterial)
     {
         foreach (RoomNode room in rooms)
         {
@@ -173,10 +188,10 @@ public static class ObjectCreator
 
             List<Quaternion> rotationAngles = new List<Quaternion>()
             {
-                Quaternion.Euler(0, 180,0),
-                Quaternion.Euler(0, 0,0),
-                Quaternion.Euler(0, -90,0),
-                Quaternion.Euler(0, 90,0)
+                Quaternion.Euler(0, 180, 0),
+                Quaternion.Euler(0, 0, 0),
+                Quaternion.Euler(0, -90, 0),
+                Quaternion.Euler(0, 90, 0)
             };
 
             for (int i = 0; i < roomsPassage.Count; i++)
@@ -187,16 +202,18 @@ public static class ObjectCreator
                         torchPrefab,
                         room.TorchParent,
                         torchesPosition[i],
-                        rotationAngles[i]);
+                        rotationAngles[i],
+                        torchMaterial);
                 }
             }
         }
     }
 
-    private static GameObject CreateObject(GameObject prefab, GameObject parent, Vector3 position, Quaternion rotation)
+    private static GameObject CreateObject(GameObject prefab, GameObject parent, Vector3 position, Quaternion rotation,
+        Material material)
     {
         GameObject createdObject = Instantiate(prefab, position, rotation, parent.transform);
-        // createdObject.GetComponentInChildren<MeshRenderer>().material = material;
+        createdObject.GetComponentInChildren<MeshRenderer>().material = material;
 
         return createdObject;
     }

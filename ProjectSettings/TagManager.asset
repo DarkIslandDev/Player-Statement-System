@@ -6,11 +6,13 @@ TagManager:
   tags:
   - Ground
   - Wall
+  - Visited
+  - NotVisited
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - PlayerPoint
   - Water
   - UI
   - Ground
@@ -18,7 +20,7 @@ TagManager:
   - Post Processing
   - 
   - Controller
-  - 
+  - Visited
   - 
   - 
   - 

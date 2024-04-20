@@ -232,12 +232,12 @@ public struct Box : IEquatable<Box>
     /// <summary>
     ///   <para>A BoundsInt.PositionCollection that contains all positions within the BoundsInt.</para>
     /// </summary>
-    public Box.PositionEnumerator allPositionWithin => new PositionEnumerator(Min, Max);
+    public PositionEnumerator allPositionWithin => new PositionEnumerator(Min, Max);
 
     /// <summary>
     ///   <para>An iterator that allows you to iterate over all positions within the BoundsInt.</para>
     /// </summary>
-    public struct PositionEnumerator : IEnumerator<Vector3>, IEnumerator, IDisposable
+    public struct PositionEnumerator : IEnumerator<Vector3>
     {
         private readonly Vector3 min;
         private readonly Vector3 max;
@@ -256,7 +256,7 @@ public struct Box : IEquatable<Box>
         /// <returns>
         ///   <para>This BoundsInt.PositionEnumerator.</para>
         /// </returns>
-        public Box.PositionEnumerator GetEnumerator() => this;
+        public PositionEnumerator GetEnumerator() => this;
 
         /// <summary>
         ///   <para>Moves the enumerator to the next position.</para>
