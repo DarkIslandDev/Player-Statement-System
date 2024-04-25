@@ -1,29 +1,14 @@
-﻿using UnityEngine;
-
-public enum RoomType
-{
-    Default,
-    SafeRoom,
-    MonsterRoom,
-    BossRoom,
-    TreasureRoom,
-    MerchantsRoom
-}
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class RoomNode : Node
 {
-    [SerializeField] protected bool spawnNode;
-    [SerializeField] protected RoomType roomType;
+    [SerializeField] protected DungeonEnums.RoomType roomType;
     
     protected GameObject torchParent;
-    
-    public bool SpawnNode
-    {
-        get => spawnNode;
-        set => spawnNode = value;
-    }
+    protected List<Torch> torches;
 
-    public RoomType RoomType
+    public DungeonEnums.RoomType RoomType
     {
         get => roomType;
         set => roomType = value;
@@ -35,8 +20,10 @@ public class RoomNode : Node
         set => torchParent = value;
     }
 
-    public RoomNode() : base(null)
+    public List<Torch> Torches
     {
+        get => torches;
+        set => torches = value;
     }
 
     public RoomNode(Vector2Int bottomLeftAreaCorner, Vector2Int topRightAreaCorner, Node parentNode, int index) :

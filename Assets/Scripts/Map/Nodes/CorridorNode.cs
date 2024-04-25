@@ -6,14 +6,14 @@ using Random = UnityEngine.Random;
 
 public class CorridorNode : Node
 {
-    [SerializeField] private Orientation orientation;
+    [SerializeField] private DungeonEnums.Orientation orientation;
 
     private Node structure1;
     private Node structure2;
     private int corridorWidth;
     private int modifierDistanceFromWall = 1;
 
-    public Orientation Orientation
+    public DungeonEnums.Orientation Orientation
     {
         get => orientation;
         set => orientation = value;
@@ -29,19 +29,19 @@ public class CorridorNode : Node
         this.corridorWidth = corridorWidth;
     }
 
-    public void SetOrientationForDoor(RelativePosition relativePosition)
+    public void SetOrientationForDoor(DungeonEnums.RelativePosition relativePosition)
     {
-        orientation = relativePosition is RelativePosition.Down or RelativePosition.Up
-            ? Orientation.Vertical
-            : Orientation.Horizontal;
+        orientation = relativePosition is DungeonEnums.RelativePosition.Down or DungeonEnums.RelativePosition.Up
+            ? DungeonEnums.Orientation.Vertical
+            : DungeonEnums.Orientation.Horizontal;
     }
 
     public void ProcessRoomInRelationRightOrLeft(Node structure1, Node structure2)
     {
         Node leftStructure;
-        List<Node> leftStructureChildren = StructureHelper.TraverseGraphToExtractLowestLeafes(structure1);
+        List<Node> leftStructureChildren = StructureHelper.TraverseGraphToExtractLowestLeaves(structure1);
 
-        List<Node> rightStructureChildren = StructureHelper.TraverseGraphToExtractLowestLeafes(structure2);
+        List<Node> rightStructureChildren = StructureHelper.TraverseGraphToExtractLowestLeaves(structure2);
 
         List<Node> sortedLeftStructure =
             leftStructureChildren.OrderByDescending(child => child.TopRightAreaCorner.x).ToList();
@@ -92,7 +92,14 @@ public class CorridorNode : Node
                 rightStructure.TopLeftAreaCorner,
                 rightStructure.BottomLeftAreaCorner);
         }
+        
+        // Test create middle point
+        // int middleY = (leftStructure.BottomRightAreaCorner.y + rightStructure.TopLeftAreaCorner.y) / 2;
+        //
+        // BottomLeftAreaCorner = new Vector2Int(leftStructure.BottomRightAreaCorner.x , middleY);
+        // TopRightAreaCorner = new Vector2Int(rightStructure.TopLeftAreaCorner.x, middleY + corridorWidth);
 
+        // Test create from original values
         BottomLeftAreaCorner = new Vector2Int(leftStructure.BottomRightAreaCorner.x , y);
         TopRightAreaCorner = new Vector2Int(rightStructure.TopLeftAreaCorner.x, y + corridorWidth);
     }
@@ -138,9 +145,9 @@ public class CorridorNode : Node
     public void ProcessRoomInRelationUpOrDown(Node structure1, Node structure2)
     {
         Node bottomStructure;
-        List<Node> structureBottomChildren = StructureHelper.TraverseGraphToExtractLowestLeafes(structure1);
+        List<Node> structureBottomChildren = StructureHelper.TraverseGraphToExtractLowestLeaves(structure1);
 
-        List<Node> structureAboveChildren = StructureHelper.TraverseGraphToExtractLowestLeafes(structure2);
+        List<Node> structureAboveChildren = StructureHelper.TraverseGraphToExtractLowestLeaves(structure2);
 
         List<Node> sortedBottomStructure =
             structureBottomChildren.OrderByDescending(child => child.TopRightAreaCorner.y).ToList();
@@ -233,7 +240,7 @@ public class CorridorNode : Node
         return -1;
     }
 
-    public RelativePosition CheckPositionStructure2AgainstStructure1()
+    public DungeonEnums.RelativePosition CheckPositionStructure2AgainstStructure1()
     {
         Vector2 middlePointStructure1Temp =
             ((Vector2)structure1.TopRightAreaCorner + structure1.BottomLeftAreaCorner) / 2;
@@ -247,13 +254,13 @@ public class CorridorNode : Node
         {
             case < 45 and >= 0:
             case > -45 and < 0:
-                return RelativePosition.Right;
+                return DungeonEnums.RelativePosition.Right;
             case > 45 and < 135:
-                return RelativePosition.Up;
+                return DungeonEnums.RelativePosition.Up;
             case > -135 and < -45:
-                return RelativePosition.Down;
+                return DungeonEnums.RelativePosition.Down;
             default:
-                return RelativePosition.Left;
+                return DungeonEnums.RelativePosition.Left;
         }
     }
 

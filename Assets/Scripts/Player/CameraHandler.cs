@@ -6,7 +6,7 @@ public class CameraHandler : MonoBehaviour
     [SerializeField] private bool cameraFixed;
     [SerializeField] private new Camera camera;
     [SerializeField] private Transform target;
-    
+
     [Header("Values")]
     [SerializeField] private float followSpeed = 0.1f;
     [SerializeField] private float zoomScale = 5;
@@ -15,28 +15,37 @@ public class CameraHandler : MonoBehaviour
 
     private Vector3 cameraFollowVelocity = Vector3.zero;
 
-    public static CameraHandler Instance { get; private set; }
+    // public static CameraHandler Instance { get; private set; }
     public Camera Camera => camera;
+    public Transform Target { get => target; set => target = value; }
 
     private void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            DestroyImmediate(gameObject);
-        }
+        // if (Instance == null)
+        // {
+        //     Instance = this;
+        //     DontDestroyOnLoad(gameObject);
+        // }
+        // else
+        // {
+        //     DestroyImmediate(gameObject);
+        // }
     }
-    
+
+    public void Init(Transform target)
+    {
+        this.target = target;
+    }
+
     public void FollowTarget(float delta)
     {
-        Vector3 targetPos = Vector3.SmoothDamp(camera.transform.position, target.position,
-            ref cameraFollowVelocity, delta / followSpeed);
-        
-        camera.transform.position = cameraFixed ? target.position : targetPos;
+        if (target != null)
+        {
+            Vector3 targetPos = Vector3.SmoothDamp(camera.transform.position, target.position,
+                ref cameraFollowVelocity, delta / followSpeed);
+
+            camera.transform.position = cameraFixed ? target.position : targetPos;
+        }
     }
 
     public void Zoom(float zoomDiff)

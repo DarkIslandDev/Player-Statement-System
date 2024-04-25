@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 [CreateAssetMenu(menuName = "Dungeon Data", fileName = "Dungeon Data", order = 0)]
 public class DungeonGeneratorSO : ScriptableObject
@@ -15,4 +16,14 @@ public class DungeonGeneratorSO : ScriptableObject
     [Range(0.0f, 0.3f)] public float roomBottomCornerModifier;
     [Range(0.7f, 1.0f)] public float roomTopCornerModifier;
     [Range(0, 2)] public int roomOffset;
+
+    [Header("Decorations")] 
+    public List<Decoration> monsterRoomDecorations;
+    public List<Decoration> treasureRoomDecorations;
+
+    [Header("Pillars")]
+    public GameObject[] pillars;
+
+    [Header("Materials")]
+    public Material floorMaterial;
 }

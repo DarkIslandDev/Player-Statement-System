@@ -252,10 +252,10 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": -370.0000305175781,
-            "y": -14.999994277954102,
-            "width": 95.0,
-            "height": 34.00000762939453
+            "x": -405.0,
+            "y": -15.0,
+            "width": 130.0,
+            "height": 34.0
         }
     },
     "m_Slots": [
@@ -449,7 +449,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "846284e1b45844fdb1138dec0ceaf189",
     "m_Id": 0,
-    "m_DisplayName": "Bits",
+    "m_DisplayName": "Resolution",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -578,10 +578,10 @@
     "m_Guid": {
         "m_GuidSerialized": "79508691-bbea-46fc-984b-38d0f11aa27d"
     },
-    "m_Name": "Bits",
+    "m_Name": "Resolution",
     "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "Bits",
-    "m_DefaultReferenceName": "_Bits",
+    "m_RefNameGeneratedByDisplayName": "Resolution",
+    "m_DefaultReferenceName": "_Resolution",
     "m_OverrideReferenceName": "",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,

@@ -1,20 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class Node : MonoBehaviour
 {
-    [Header("Room Visited Check")]
     [SerializeField] protected bool visited;
-    [Header("Node Bounds")]
     [SerializeField] protected Box nodeBounds;
-    [Space]
-    [Header("Entrance Value")]
-    [SerializeField] protected bool doorTopSide;
+    [Space] [SerializeField] protected bool doorTopSide;
     [SerializeField] protected bool doorBottomSide;
     [SerializeField] protected bool doorLeftSide;
     [SerializeField] protected bool doorRightSide;
-    [Space]
-    protected GameObject roomWalls;
+    [Space] protected GameObject roomWalls;
     protected GameObject topWalls;
     protected GameObject bottomWalls;
     protected GameObject leftWalls;
@@ -25,15 +21,17 @@ public abstract class Node : MonoBehaviour
     protected List<GameObject> leftWallsArray;
     protected List<GameObject> rightWallsArray;
     protected Mesh mesh;
-    
+
     private List<Node> childrenNodeList;
+    private Node parent;
+    private int treeLayerIndex;
 
     public Box NodeBounds
     {
         get => nodeBounds;
         set => nodeBounds = value;
     }
-    
+
     public bool DoorTopSide
     {
         get => doorTopSide;
@@ -104,8 +102,8 @@ public abstract class Node : MonoBehaviour
     public Vector2Int BottomCenterArea { get; set; }
     public Vector2Int LeftCenterArea { get; set; }
     public Vector2Int RightCenterArea { get; set; }
-    public int Width => (TopRightAreaCorner.x - BottomLeftAreaCorner.x);
-    public int Length => (TopRightAreaCorner.y - BottomLeftAreaCorner.y);
+    public int Width => TopRightAreaCorner.x - BottomLeftAreaCorner.x;
+    public int Length => TopRightAreaCorner.y - BottomLeftAreaCorner.y;
     public BoxCollider BoxCollider { get; set; }
 
     public Mesh Mesh
@@ -113,16 +111,25 @@ public abstract class Node : MonoBehaviour
         get => mesh;
         set => mesh = value;
     }
-    
-    public Node Parent { private get; set; }
-    public int TreeLayerIndex { get; protected set; }
+
+    public Node Parent
+    {
+        get => parent;
+        set => parent = value;
+    }
+
+    public int TreeLayerIndex
+    {
+        get => treeLayerIndex;
+        protected set => treeLayerIndex = value;
+    }
 
     public bool Visited
     {
         get => visited;
         set => visited = value;
     }
-    
+
     public GameObject TopWalls
     {
         get => topWalls;
@@ -161,19 +168,17 @@ public abstract class Node : MonoBehaviour
         parentNode?.AddChild(this);
     }
 
-    public void AddChild(Node node) => childrenNodeList.Add(node);
+    public void AddChild(Node node)
+    {
+        childrenNodeList.Add(node);
+    }
 
-    public void RemoveChild(Node node) => childrenNodeList.Remove(node);
-    
     private void OnTriggerEnter(Collider other)
     {
-        if (!visited)
+        if (!visited && other.GetComponent<Player>())
         {
-            if (other.GetComponent<Player>())
-            {
-                visited = true;
-                gameObject.layer = 11;
-            }
+            visited = true;
+            gameObject.layer = 11;
         }
     }
 }

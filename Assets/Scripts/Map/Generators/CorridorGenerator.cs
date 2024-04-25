@@ -13,7 +13,7 @@ public class CorridorGenerator : MonoBehaviour
     private List<Vector3> possibleWallVerticalPosition;
     private List<Vector3> possibleDoorVerticalPosition;
 
-    public List<Orientation> Orientations { get; private set; } = new();
+    public List<DungeonEnums.Orientation> Orientations { get; private set; } = new();
 
     public List<CorridorNode> CorridorList => corridorList;
 
@@ -22,16 +22,15 @@ public class CorridorGenerator : MonoBehaviour
         dungeonGenerator ??= GetComponent<DungeonGenerator>();
     }
 
-    public void Init(List<Vector3> possibleWallHorizontalPosition, List<Vector3> possibleDoorHorizontalPosition,
-        List<Vector3> possibleWallVerticalPosition, List<Vector3> possibleDoorVerticalPosition)
+    public void Init(List<Vector3> pwhp, List<Vector3> pdhp, List<Vector3> pwvp, List<Vector3> pdvp)
     {
-        this.possibleWallHorizontalPosition = possibleWallHorizontalPosition;
-        this.possibleWallVerticalPosition = possibleWallVerticalPosition;
-        this.possibleDoorHorizontalPosition = possibleDoorHorizontalPosition;
-        this.possibleDoorVerticalPosition = possibleDoorVerticalPosition;
+        possibleWallHorizontalPosition = pwhp;
+        possibleWallVerticalPosition = pwvp;
+        possibleDoorHorizontalPosition = pdhp;
+        possibleDoorVerticalPosition = pdvp;
     }
 
-    public void CalculateCorridor(List<Node> rooms, GameObject doorPrefab, Material doorMaterial, int corridorWidth)
+    public void CalculateCorridor(List<Node> rooms, GameObject doorPrefab, int corridorWidth)
     {
         corridorList = new List<CorridorNode>();
 
@@ -39,7 +38,7 @@ public class CorridorGenerator : MonoBehaviour
 
         GenerateCorridors(corridorList);
 
-        ObjectCreator.CreateDoorInCorridor(corridorList, doorPrefab, doorMaterial);
+        ObjectCreator.CreateDoorInCorridor(corridorList, doorPrefab);
     }
 
     public void GenerateCorridors(List<CorridorNode> nodes)
@@ -49,10 +48,9 @@ public class CorridorGenerator : MonoBehaviour
             GameObject meshGO = ObjectCreator.CreateMesh(
                 nodes[i].BottomLeftAreaCorner,
                 nodes[i].TopRightAreaCorner,
-                dungeonGenerator.materials.floorMaterial);
+                dungeonGenerator.dungeonData.floorMaterial);
 
             MeshFilter meshFilter = meshGO.GetComponent<MeshFilter>();
-            BoxCollider boxCollider = meshGO.GetComponent<BoxCollider>();
 
             CalculateValuesFromNodes(
                 nodes[i].TopRightAreaCorner,
@@ -72,6 +70,7 @@ public class CorridorGenerator : MonoBehaviour
         {
             CalculateAdditionalValuesFromNode(topRight, bottomLeft, mesh, node);
 
+            node.BoxCollider = dungeonFloor.GetComponent<BoxCollider>();
             dungeonFloor.name += $" | {node.NodeBounds.Position.x} / {node.NodeBounds.Position.z}";
             mesh.name = node.name;
 
@@ -142,7 +141,7 @@ public class CorridorGenerator : MonoBehaviour
 
     public List<CorridorNode> CreateCorridor(List<Node> allNodesCollection, int corridorWidth)
     {
-        Orientations = new List<Orientation>();
+        Orientations = new List<DungeonEnums.Orientation>();
 
         List<CorridorNode> corridorList = new List<CorridorNode>();
         Queue<Node> structuresToCheck =
@@ -173,20 +172,20 @@ public class CorridorGenerator : MonoBehaviour
 
     private void GenerateCorridor(CorridorNode corridor)
     {
-        RelativePosition relativePosition = corridor.CheckPositionStructure2AgainstStructure1();
+        DungeonEnums.RelativePosition relativePosition = corridor.CheckPositionStructure2AgainstStructure1();
 
         switch (relativePosition)
         {
-            case RelativePosition.Up:
+            case DungeonEnums.RelativePosition.Up:
                 corridor.ProcessRoomInRelationUpOrDown(corridor.Structure1, corridor.Structure2);
                 break;
-            case RelativePosition.Down:
+            case DungeonEnums.RelativePosition.Down:
                 corridor.ProcessRoomInRelationUpOrDown(corridor.Structure2, corridor.Structure1);
                 break;
-            case RelativePosition.Right:
+            case DungeonEnums.RelativePosition.Right:
                 corridor.ProcessRoomInRelationRightOrLeft(corridor.Structure1, corridor.Structure2);
                 break;
-            case RelativePosition.Left:
+            case DungeonEnums.RelativePosition.Left:
                 corridor.ProcessRoomInRelationRightOrLeft(corridor.Structure2, corridor.Structure1);
                 break;
             default:

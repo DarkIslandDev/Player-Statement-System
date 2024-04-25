@@ -1,9 +1,14 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class RoomGenerator : MonoBehaviour
 {
     [SerializeField] private List<RoomNode> roomList = new List<RoomNode>();
+    [SerializeField] private List<RoomNode> monsterRooms = new List<RoomNode>();
+    [SerializeField] private List<RoomNode> treasureRooms = new List<RoomNode>();
+    [SerializeField] private List<RoomNode> bossRooms = new List<RoomNode>();
+    [SerializeField] private List<RoomNode> merchantRooms = new List<RoomNode>();
     [SerializeField] private BinarySpacePartitioner binarySpacePartitioner;
     [SerializeField] private DungeonGenerator dungeonGenerator;
 
@@ -12,7 +17,13 @@ public class RoomGenerator : MonoBehaviour
     private List<Vector3> possibleWallVerticalPosition;
     private List<Vector3> possibleDoorVerticalPosition;
 
+    [SerializeField] private RoomNode safeRoom;
+
     public List<RoomNode> RoomList => roomList;
+    public List<RoomNode> MonsterRooms => monsterRooms;
+    public List<RoomNode> TreasureRooms => treasureRooms;
+    public List<RoomNode> BossRooms => bossRooms;
+    public List<RoomNode> MerchantRooms => merchantRooms;
 
     private void Awake()
     {
@@ -20,20 +31,19 @@ public class RoomGenerator : MonoBehaviour
         dungeonGenerator ??= GetComponent<DungeonGenerator>();
     }
 
-    public void Init(List<Vector3> possibleWallHorizontalPosition, List<Vector3> possibleDoorHorizontalPosition,
-        List<Vector3> possibleWallVerticalPosition, List<Vector3> possibleDoorVerticalPosition)
+    public void Init(List<Vector3> pwhp, List<Vector3> pdhp, List<Vector3> pwvp, List<Vector3> pdvp)
     {
-        this.possibleWallHorizontalPosition = possibleWallHorizontalPosition;
-        this.possibleWallVerticalPosition = possibleWallVerticalPosition;
-        this.possibleDoorHorizontalPosition = possibleDoorHorizontalPosition;
-        this.possibleDoorVerticalPosition = possibleDoorVerticalPosition;
+        possibleWallHorizontalPosition = pwhp;
+        possibleWallVerticalPosition = pwvp;
+        possibleDoorHorizontalPosition = pdhp;
+        possibleDoorVerticalPosition = pdvp;
     }
 
     public void CalculateRooms(float bcModifier, float tcModifier, int roomOffset)
     {
         roomList = new List<RoomNode>();
 
-        List<Node> roomSpaces = StructureHelper.TraverseGraphToExtractLowestLeafes(binarySpacePartitioner.RoomNode);
+        List<Node> roomSpaces = StructureHelper.TraverseGraphToExtractLowestLeaves(binarySpacePartitioner.RoomNode);
 
         roomList = GenerateRoomsInGivenSpaces(
             roomSpaces,
@@ -44,17 +54,17 @@ public class RoomGenerator : MonoBehaviour
 
         GenerateRooms(roomList);
     }
-    
+
     public List<RoomNode> GenerateRoomsInGivenSpaces(List<Node> rooms, float bcModifier, float tcModifier, int offset)
     {
         List<RoomNode> listToReturn = new List<RoomNode>();
 
         foreach (Node space in rooms)
         {
-            Vector2Int newBottomLeftPoint = StructureHelper.GenerateBottomLeftCornerBetween(
+            Vector2Int newBottomLeftPoint = StructureHelper.GeneratePointBetween(
                 space.BottomLeftAreaCorner, space.TopRightAreaCorner, bcModifier, offset);
 
-            Vector2Int newTopRightPoint = StructureHelper.GenerateTopRightCornerBetween(
+            Vector2Int newTopRightPoint = StructureHelper.GeneratePointBetween(
                 space.BottomLeftAreaCorner, space.TopRightAreaCorner, tcModifier, offset);
 
             space.BottomLeftAreaCorner = newBottomLeftPoint;
@@ -75,7 +85,7 @@ public class RoomGenerator : MonoBehaviour
             GameObject meshGO = ObjectCreator.CreateMesh(
                 roomNodes[i].BottomLeftAreaCorner,
                 roomNodes[i].TopRightAreaCorner,
-                dungeonGenerator.materials.floorMaterial
+                dungeonGenerator.dungeonData.floorMaterial
             );
 
             Mesh mesh = meshGO.GetComponent<MeshFilter>().sharedMesh;
@@ -91,6 +101,8 @@ public class RoomGenerator : MonoBehaviour
         }
     }
 
+    #region NodeCreating
+
     private void CalculateValuesFromNodes(Vector2 topRight, Vector2 bottomLeft, GameObject dungeonFloor, Mesh mesh)
     {
         Node node = null;
@@ -101,6 +113,7 @@ public class RoomGenerator : MonoBehaviour
         {
             CalculateAdditionalValuesFromNode(topRight, bottomLeft, mesh, node);
 
+            node.BoxCollider = dungeonFloor.GetComponent<BoxCollider>();
             dungeonFloor.name += $" | {node.NodeBounds.Position.x} / {node.NodeBounds.Position.z}";
             mesh.name = node.name;
 
@@ -128,7 +141,10 @@ public class RoomGenerator : MonoBehaviour
         node.RightCenterArea =
             new Vector2Int((int)topRight.x, (int)(topRight.y + bottomLeft.y) / 2);
     }
+    
+    #endregion
 
+    #region WallsPositionCalculating
     private void CreateWallsParentObject(Node node)
     {
         GameObject roomWalls = ObjectCreator.CreateWallsParentObject(node.transform, "RoomWalls");
@@ -173,7 +189,7 @@ public class RoomGenerator : MonoBehaviour
 
         return roomNode;
     }
-    
+
     private void AddWallsPositionToFloor(Vector2 topRight, Vector2 bottomLeft, Node node)
     {
         Vector3 bottomLeftV = new Vector3(bottomLeft.x, 0, bottomLeft.y);
@@ -279,15 +295,19 @@ public class RoomGenerator : MonoBehaviour
         return childTransforms;
     }
 
+    #endregion
+
+    #region AdditionalCode
     private void SetRoomType(int i)
     {
         if (i == 0)
         {
-            roomList[i].RoomType = RoomType.SafeRoom;
+            roomList[i].RoomType = DungeonEnums.RoomType.SafeRoom;
+            safeRoom = roomList[i];
         }
         else if (i == roomList.Count - 1)
         {
-            roomList[i].RoomType = RoomType.BossRoom;
+            roomList[i].RoomType = DungeonEnums.RoomType.BossRoom;
         }
         else
         {
@@ -297,18 +317,104 @@ public class RoomGenerator : MonoBehaviour
             {
                 // 60% вероятности для MonsterRoom
                 case < 60:
-                    roomList[i].RoomType = RoomType.MonsterRoom;
+                    roomList[i].RoomType = DungeonEnums.RoomType.MonsterRoom;
                     break;
                 // 30% вероятности для TreasureRoom
                 case < 90:
-                    roomList[i].RoomType = RoomType.TreasureRoom;
+                    roomList[i].RoomType = DungeonEnums.RoomType.TreasureRoom;
                     break;
                 // 10% вероятности для других типов комнат
                 default:
                     roomList[i].RoomType =
-                        (RoomType)Random.Range((int)RoomType.MerchantsRoom, (int)RoomType.TreasureRoom);
+                        (DungeonEnums.RoomType)Random.Range((int)DungeonEnums.RoomType.MerchantsRoom, (int)DungeonEnums.RoomType.TreasureRoom);
+                    break;
+            }
+        }
+
+        // if (roomList[i].RoomType == DungeonEnums.RoomType.SafeRoom)
+        // {
+        //     safeRoom = roomList[i];
+        // }
+    }
+
+    public void SpawnDecorationInRooms()
+    {
+        SpawnDecorationInMonsterRoom();
+        SpawnDecorationInTreasureRoom();
+    }
+
+    private void SpawnDecorationInMonsterRoom()
+    {
+        for (int i = 0; i < monsterRooms.Count; i++)
+        {
+            Decoration decoration = GetRandomDecoration(dungeonGenerator.dungeonData.monsterRoomDecorations);
+            ObjectCreator.CreateDecoration(monsterRooms[i], decoration);
+        }
+    }
+
+    private void SpawnDecorationInTreasureRoom()
+    {
+        for (int i = 0; i < treasureRooms.Count; i++)
+        {
+            if (i % 2==0)
+            {
+                return;
+            }
+
+            Decoration decoration = GetRandomDecoration(dungeonGenerator.dungeonData.treasureRoomDecorations);
+            ObjectCreator.CreateDecoration(treasureRooms[i], decoration);
+        }
+    }
+
+    private static Decoration GetRandomDecoration(List<Decoration> decorations)
+    {
+        float totalWeight = decorations.Sum(d => d.weight);
+        float randomWeight = Random.Range(0, totalWeight);
+
+        Decoration selectedDecoration = null;
+        float weightSoFar = 0;
+
+        foreach (Decoration decoration in decorations)
+        {
+            weightSoFar += decoration.weight;
+            if (randomWeight <= weightSoFar)
+            {
+                selectedDecoration = decoration;
+                break;
+            }
+        }
+
+        return selectedDecoration;
+    }
+
+    public RoomNode GetSafeRoom() => safeRoom;
+
+    public void GetRoomsByCategory()
+    {
+        monsterRooms.Clear();
+        treasureRooms.Clear();
+        bossRooms.Clear();
+        merchantRooms.Clear();
+
+        for (int i = 0; i < roomList.Count; i++)
+        {
+            switch (roomList[i].RoomType)
+            {
+                case DungeonEnums.RoomType.MonsterRoom:
+                    monsterRooms.Add(roomList[i]);
+                    break;
+                case DungeonEnums.RoomType.TreasureRoom:
+                    treasureRooms.Add(roomList[i]);
+                    break;
+                case DungeonEnums.RoomType.BossRoom:
+                    bossRooms.Add(roomList[i]);
+                    break;
+                case DungeonEnums.RoomType.MerchantsRoom:
+                    merchantRooms.Add(roomList[i]);
                     break;
             }
         }
     }
+
+    #endregion
 }

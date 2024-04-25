@@ -2,17 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using Random = UnityEngine.Random;
-
-[Serializable]
-public class Materials
-{
-    public Material floorMaterial;
-    public Material wallMaterial;
-    public Material doorMaterial;
-    public Material pillarMaterial;
-    public Material torchMaterial;
-}
 
 [Serializable]
 public class Prefabs
@@ -34,8 +23,8 @@ public class Components
 
 public class DungeonGenerator : MonoBehaviour
 {
-    [Space] [SerializeField] private List<RoomNode> rooms = new List<RoomNode>();
-    [Space] [SerializeField] private List<CorridorNode> corridors = new List<CorridorNode>();
+    [Space][SerializeField] private List<RoomNode> rooms = new List<RoomNode>();
+    [Space][SerializeField] private List<CorridorNode> corridors = new List<CorridorNode>();
 
     private List<Node> allRoomsCollection = new List<Node>();
     private List<Node> nodes;
@@ -48,40 +37,26 @@ public class DungeonGenerator : MonoBehaviour
 
     private GameObject roomsParent;
     private GameObject corridorsParent;
-    private GameObject wallsParent;
 
     [SerializeField] private RoomNode safeRoomNode;
 
     [Space] public DungeonGeneratorSO dungeonData;
-    [Space] public Materials materials;
     [Space] public Prefabs prefabs;
     [Space] public Components components;
 
-    public Player Player;
+    public List<RoomNode> Rooms { get => rooms; set => rooms = value; }
 
-    public List<RoomNode> Rooms
-    {
-        get => rooms;
-        set => rooms = value;
-    }
+    public List<CorridorNode> Corridors { get => corridors; set => corridors = value; }
 
-    public List<CorridorNode> Corridors
-    {
-        get => corridors;
-        set => corridors = value;
-    }
+    public GameObject RoomsParent { get => roomsParent; set => roomsParent = value; }
 
-    public GameObject RoomsParent
-    {
-        get => roomsParent;
-        set => roomsParent = value;
-    }
+    public GameObject CorridorsParent { get => corridorsParent; set => corridorsParent = value; }
 
-    public GameObject CorridorsParent
-    {
-        get => corridorsParent;
-        set => corridorsParent = value;
-    }
+    public List<Vector3> PossibleWallHorizontalPosition { get => possibleWallHorizontalPosition; set => possibleWallHorizontalPosition = value; }
+    public List<Vector3> PossibleWallVerticalPosition { get => possibleWallVerticalPosition; set => possibleWallVerticalPosition = value; }
+    public List<Vector3> PossibleDoorHorizontalPosition { get => possibleDoorHorizontalPosition; set => possibleDoorHorizontalPosition = value; }
+    public List<Vector3> PossibleDoorVerticalPosition { get => possibleDoorVerticalPosition; set => possibleDoorVerticalPosition = value; }
+
 
     private void Awake()
     {
@@ -107,8 +82,6 @@ public class DungeonGenerator : MonoBehaviour
         CreateBaseDungeon();
         CreateWalls();
         CreateDecorations();
-
-        SpawnPlayerInSafeRoom();
     }
 
     private void CreateBaseDungeon()
@@ -117,13 +90,13 @@ public class DungeonGenerator : MonoBehaviour
             dungeonData.dungeonWidth,
             dungeonData.dungeonLength
         );
-        
+
         components.corridorGenerator.Init(
             possibleWallHorizontalPosition,
             possibleDoorHorizontalPosition,
             possibleWallVerticalPosition,
             possibleDoorVerticalPosition);
-        
+
         components.roomGenerator.Init(
             possibleWallHorizontalPosition,
             possibleDoorHorizontalPosition,
@@ -137,14 +110,16 @@ public class DungeonGenerator : MonoBehaviour
                 dungeonData.roomLengthMin
             ));
 
-        components.roomGenerator.CalculateRooms(dungeonData.roomBottomCornerModifier,
+        components.roomGenerator.CalculateRooms(
+            dungeonData.roomBottomCornerModifier,
             dungeonData.roomTopCornerModifier,
             dungeonData.roomOffset);
+
+        safeRoomNode = components.roomGenerator.GetSafeRoom();
 
         components.corridorGenerator.CalculateCorridor(
             allRoomsCollection,
             prefabs.door,
-            materials.doorMaterial,
             dungeonData.corridorWidth);
     }
 
@@ -158,7 +133,6 @@ public class DungeonGenerator : MonoBehaviour
             nodes,
             prefabs.wallHorizontal,
             prefabs.wallVertical,
-            materials.wallMaterial,
             possibleWallHorizontalPosition,
             possibleWallVerticalPosition);
 
@@ -166,25 +140,16 @@ public class DungeonGenerator : MonoBehaviour
         {
             CheckPassages(rooms[i]);
         }
+
     }
 
     private void CreateDecorations()
     {
-        ObjectCreator.CreatePillars(rooms, prefabs.pillar, materials.pillarMaterial);
-        ObjectCreator.CreateTorches(rooms, prefabs.torch, materials.torchMaterial);
-    }
+        components.roomGenerator.GetRoomsByCategory();
+        components.roomGenerator.SpawnDecorationInRooms();
 
-    private void SpawnPlayerInSafeRoom()
-    {
-        if (Player)
-        {
-            Player.transform.position =
-                new Vector3(
-                    safeRoomNode.BoxCollider.center.x,
-                    0,
-                    safeRoomNode.BoxCollider.center.z
-                );
-        }
+        ObjectCreator.CreatePillars(rooms, dungeonData.pillars);
+        ObjectCreator.CreateTorches(rooms, prefabs.torch);
     }
 
     #endregion
@@ -233,6 +198,21 @@ public class DungeonGenerator : MonoBehaviour
                 DestroyImmediate(item.gameObject);
             }
         }
+    }
+
+    public Vector3 GetSafeRoomPosition()
+    {
+        Vector3 leftBottomCorner =
+                    new Vector3(safeRoomNode.BottomLeftAreaCorner.x, 0, safeRoomNode.BottomLeftAreaCorner.y);
+        Vector3 rightTopCorner =
+                    new Vector3(safeRoomNode.TopRightAreaCorner.x, 0, safeRoomNode.TopRightAreaCorner.y);
+        
+        float preX = rightTopCorner.x - leftBottomCorner.x / 2;
+        float x = rightTopCorner.x - preX;
+        float preZ = rightTopCorner.y - leftBottomCorner.y / 2;
+        float z = rightTopCorner.z - preZ;
+
+        return new Vector3(x, 0, z);
     }
 
     #endregion
