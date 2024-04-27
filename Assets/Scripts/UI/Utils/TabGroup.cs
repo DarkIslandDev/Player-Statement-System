@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class TabGroup : MonoBehaviour
 {
@@ -10,70 +7,86 @@ public class TabGroup : MonoBehaviour
     [SerializeField] private Color tabIdle;
     [SerializeField] private Color tabHover;
     [SerializeField] private Color tabActive;
-    [Space]
-    [SerializeField] private List<TabButton> tabButtons;
-    
-    private GameObject[] objectsToSwap;
-    private TabButton selectedTab;
+    [Space] 
+    [SerializeField] private List<ButtonTab> tabButtons;
+    [SerializeField] private ButtonTab selectedButtonTab;
 
     private void Start()
     {
-        selectedTab = tabButtons[0];
-        objectsToSwap = GetObjectsToSwap().ToArray();
-        objectsToSwap[0].SetActive(true);
-    }
-    
-    public void Subscribe(TabButton tabButton) => tabButtons ??= new List<TabButton> { tabButton };
+        GetChildTabButtons();
 
-    public void OnTabEnter(TabButton tabButton)
-    {
-        ResetTabs();
-
-        if (selectedTab == null || tabButton != selectedTab)
+        if (selectedButtonTab == null)
         {
-            tabButton.BackGroundImage.color = tabHover;
+            selectedButtonTab = tabButtons[0];
+        }
+
+        foreach (ButtonTab tabButton in tabButtons)
+        {
+            tabButton.TabGroup = this;
+
+            if (tabButton != null)
+            {
+                Subscribe(tabButton);
+            }
         }
     }
 
-    public void OnTabSelected(TabButton tabButton)
+    private void GetChildTabButtons()
     {
-        selectedTab = tabButton;
-        
+        foreach (Transform child in transform)
+        {
+            ButtonTab buttonTab = child.GetComponent<ButtonTab>();
+            buttonTab.TabGroup = this;
+
+            Subscribe(buttonTab);
+        }
+    }
+
+    public void Subscribe(ButtonTab buttonTab)
+    {
+        if (!buttonTab.Subscribed)
+        {
+            buttonTab.Subscribed = true;
+            tabButtons.Add(buttonTab);
+        }
+    }
+
+    public void OnTabEnter(ButtonTab buttonTab)
+    {
         ResetTabs();
 
-        tabButton.BackGroundImage.color = tabActive;
-
-        int index = tabButton.transform.GetSiblingIndex();
-
-        for (int i = 0; i < objectsToSwap.Length; i++)
+        if (selectedButtonTab == null || buttonTab != selectedButtonTab)
         {
-            objectsToSwap[i].SetActive(i == index);
+            buttonTab.BackGroundImage.color = tabHover;
         }
+    }
+
+    public void OnTabSelected(ButtonTab buttonTab)
+    {
+        if (selectedButtonTab != buttonTab)
+        {
+            selectedButtonTab.Deselect();
+        }
+
+        selectedButtonTab = buttonTab;
+
+        selectedButtonTab.Select();
+
+        ResetTabs();
+
+        selectedButtonTab.BackGroundImage.color = tabActive;
     }
 
     public void OnTabExit() => ResetTabs();
 
     private void ResetTabs()
     {
-        foreach (TabButton tabButton in tabButtons)
+        foreach (ButtonTab tabButton in tabButtons)
         {
-            if (tabButton != selectedTab)
+            if (tabButton != selectedButtonTab)
             {
                 tabButton.BackGroundImage.color = tabIdle;
             }
-        }
-    }
-    
-    private IEnumerable<GameObject> GetObjectsToSwap()
-    {
-        foreach (Transform child in transform)
-        {
-            if (child.gameObject.activeSelf)
-            {
-                continue;
-            }
-
-            yield return child.gameObject;
         }
     }
 }

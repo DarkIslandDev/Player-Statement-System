@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -202,15 +202,8 @@ public class DungeonGenerator : MonoBehaviour
 
     public Vector3 GetSafeRoomPosition()
     {
-        Vector3 leftBottomCorner =
-                    new Vector3(safeRoomNode.BottomLeftAreaCorner.x, 0, safeRoomNode.BottomLeftAreaCorner.y);
-        Vector3 rightTopCorner =
-                    new Vector3(safeRoomNode.TopRightAreaCorner.x, 0, safeRoomNode.TopRightAreaCorner.y);
-        
-        float preX = rightTopCorner.x - leftBottomCorner.x / 2;
-        float x = rightTopCorner.x - preX;
-        float preZ = rightTopCorner.y - leftBottomCorner.y / 2;
-        float z = rightTopCorner.z - preZ;
+        float x = safeRoomNode.TopRightAreaCorner.x / 2;
+        float z = safeRoomNode.TopRightAreaCorner.x / 2;
 
         return new Vector3(x, 0, z);
     }

@@ -79,7 +79,7 @@ public class PlayerMovement : MonoBehaviour
 
         playerAnimator.UpdateAnimatorValues(
             playerInputHandler.MoveAmount,
-            playerInputHandler.MoveAmount,
+            0,
             player.IsSprinting);
 
         if (player.CanRotate)

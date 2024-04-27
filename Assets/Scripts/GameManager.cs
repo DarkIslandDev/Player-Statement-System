@@ -46,9 +46,10 @@ public class GameManager : MonoBehaviour
         {
             GameObject p = Instantiate(
                 playerPrefab, 
-                dungeonGenerator.GetSafeRoomPosition(), 
+                playerPrefab.transform.localPosition,
                 playerPrefab.transform.localRotation);
             player = p.GetComponent<Player>();
+            player.transform.localPosition = dungeonGenerator.GetSafeRoomPosition();
 
             GameObject c = Instantiate(
                 cameraPrefab,
