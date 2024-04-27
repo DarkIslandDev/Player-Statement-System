@@ -1,16 +1,21 @@
 ﻿public class PlayerMovementStateMachine : StateMachine
 {
+    public Player Player { get; }
+    public PlayerStateReusableData ReusableData { get; }
     public PlayerIdlingState IdlingState { get; }
     public PlayerWalkingState WalkingState { get; }
     public PlayerRunningState RunningState { get; }
     public PlayerSprintingState SprintingState { get; }
 
-    public PlayerMovementStateMachine()
+    public PlayerMovementStateMachine(Player player)
     {
-        IdlingState = new PlayerIdlingState();
+        Player = player;
+        ReusableData = new PlayerStateReusableData();
+        
+        IdlingState = new PlayerIdlingState(this);
 
-        WalkingState = new PlayerWalkingState();
-        RunningState = new PlayerRunningState();
-        SprintingState = new PlayerSprintingState();
+        WalkingState = new PlayerWalkingState(this);
+        RunningState = new PlayerRunningState(this);
+        SprintingState = new PlayerSprintingState(this);
     }
 }

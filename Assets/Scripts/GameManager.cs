@@ -37,28 +37,28 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        SpawnPlayerOnStart();
+        // SpawnPlayerOnStart();
     }
 
-    private void SpawnPlayerOnStart()
-    {
-        if (playerPrefab != null)
-        {
-            GameObject p = Instantiate(
-                playerPrefab, 
-                playerPrefab.transform.localPosition,
-                playerPrefab.transform.localRotation);
-            player = p.GetComponent<Player>();
-            player.transform.localPosition = dungeonGenerator.GetSafeRoomPosition();
-
-            GameObject c = Instantiate(
-                cameraPrefab,
-                 Vector3.zero,
-                  Quaternion.identity);
-            cameraHandler = c.GetComponent<CameraHandler>();
-
-            player.Init(cameraHandler, minimapCamera, uiManager.GUIMenu);
-            cameraHandler.Init(player.transform);
-        }
-    }
+    // private void SpawnPlayerOnStart()
+    // {
+    //     if (playerPrefab != null)
+    //     {
+    //         GameObject p = Instantiate(
+    //             playerPrefab, 
+    //             playerPrefab.transform.localPosition,
+    //             playerPrefab.transform.localRotation);
+    //         player = p.GetComponent<Player>();
+    //         player.transform.localPosition = dungeonGenerator.GetSafeRoomPosition();
+    //
+    //         GameObject c = Instantiate(
+    //             cameraPrefab,
+    //              Vector3.zero,
+    //               Quaternion.identity);
+    //         cameraHandler = c.GetComponent<CameraHandler>();
+    //
+    //         player.Init(cameraHandler, minimapCamera, uiManager.GUIMenu);
+    //         cameraHandler.Init(player.transform);
+    //     }
+    // }
 }
