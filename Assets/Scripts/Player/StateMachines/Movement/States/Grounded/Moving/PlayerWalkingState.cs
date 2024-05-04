@@ -1,4 +1,4 @@
-﻿using UnityEngine.InputSystem;
+using UnityEngine.InputSystem;
 
 public class PlayerWalkingState : PlayerMovingState
 {
@@ -6,26 +6,39 @@ public class PlayerWalkingState : PlayerMovingState
     {
     }
 
-    #region IState Methods
-
     public override void Enter()
     {
+        stateMachine.ReusableData.MovementSpeedModifier = groundedData.WalkData.SpeedModifier;
+
+        stateMachine.ReusableData.BackwardsCameraRecenteringData = groundedData.WalkData.BackwardsCameraRecenteringData;
+
         base.Enter();
 
-        stateMachine.ReusableData.MovementSpeedModifier = movementData.WalkData.SpeedModifier;
-        
+        StartAnimation(stateMachine.Player.AnimationData.WalkParameterHash);
+
+        stateMachine.ReusableData.CurrentJumpForce = airborneData.JumpData.WeakForce;
     }
 
-    #endregion
+    public override void Exit()
+    {
+        base.Exit();
 
-    #region Input Methods
+        StopAnimation(stateMachine.Player.AnimationData.WalkParameterHash);
+
+        SetBaseCameraRecenteringData();
+    }
 
     protected override void OnWalkToggleStarted(InputAction.CallbackContext context)
     {
         base.OnWalkToggleStarted(context);
-        
+
         stateMachine.ChangeState(stateMachine.RunningState);
     }
 
-    #endregion
+    protected override void OnMovementCanceled(InputAction.CallbackContext context)
+    {
+        stateMachine.ChangeState(stateMachine.LightStoppingState);
+
+        base.OnMovementCanceled(context);
+    }
 }

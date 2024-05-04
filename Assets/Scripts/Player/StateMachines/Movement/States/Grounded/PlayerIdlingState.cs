@@ -1,29 +1,38 @@
-﻿using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerIdlingState : PlayerGroundedState
 {
     public PlayerIdlingState(PlayerMovementStateMachine playerMovementStateMachine) : base(playerMovementStateMachine)
     {
-        
     }
-
-    #region IState Methods
 
     public override void Enter()
     {
+        stateMachine.ReusableData.MovementSpeedModifier = 0f;
+
+        stateMachine.ReusableData.BackwardsCameraRecenteringData = groundedData.IdleData.BackwardsCameraRecenteringData;
+
         base.Enter();
 
-        stateMachine.ReusableData.MovementSpeedModifier = 0;
-        
+        StartAnimation(stateMachine.Player.AnimationData.IdleParameterHash);
+
+        stateMachine.ReusableData.CurrentJumpForce = airborneData.JumpData.StationaryForce;
+
         ResetVelocity();
+    }
+
+    public override void Exit()
+    {
+        base.Exit();
+
+        StopAnimation(stateMachine.Player.AnimationData.IdleParameterHash);
     }
 
     public override void Update()
     {
         base.Update();
 
-        if (movementInput == Vector2.zero)
+        if (stateMachine.ReusableData.MovementInput == Vector2.zero)
         {
             return;
         }
@@ -31,5 +40,15 @@ public class PlayerIdlingState : PlayerGroundedState
         OnMove();
     }
 
-    #endregion
+    public override void PhysicsUpdate()
+    {
+        base.PhysicsUpdate();
+
+        if (!IsMovingHorizontally())
+        {
+            return;
+        }
+
+        ResetVelocity();
+    }
 }
