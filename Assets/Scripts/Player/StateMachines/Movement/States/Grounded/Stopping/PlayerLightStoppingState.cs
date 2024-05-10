@@ -8,7 +8,7 @@ public class PlayerLightStoppingState : PlayerStoppingState
     {
         base.Enter();
 
-        stateMachine.ReusableData.MovementDecelerationForce = groundedData.StopData.LigtDeceleration;
+        stateMachine.ReusableData.MovementDecelerationForce = groundedData.StopData.LightDecelerationForce;
 
         stateMachine.ReusableData.CurrentJumpForce = airborneData.JumpData.WeakForce;
     }

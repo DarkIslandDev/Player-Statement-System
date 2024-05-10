@@ -1,7 +1,6 @@
 public class PlayerLandingState : PlayerGroundedState
 {
-    public PlayerLandingState(PlayerMovementStateMachine playerMovementStateMachine) : base(
-        playerMovementStateMachine)
+    public PlayerLandingState(PlayerMovementStateMachine playerMovementStateMachine) : base(playerMovementStateMachine)
     {
     }
 
@@ -11,7 +10,7 @@ public class PlayerLandingState : PlayerGroundedState
 
         StartAnimation(stateMachine.Player.AnimationData.LandingParameterHash);
 
-        DisableCameraRecentering();
+        // DisableCameraRecentering();
     }
 
     public override void Exit()

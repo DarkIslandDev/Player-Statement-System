@@ -18,10 +18,10 @@ TagManager:
   - Ground
   - Wall
   - Post Processing
-  - 
+  - GroundCheck
   - Controller
   - Visited
-  - 
+  - Interactable
   - 
   - 
   - 

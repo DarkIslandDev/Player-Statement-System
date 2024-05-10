@@ -5,6 +5,7 @@ public class PlayerMovementStateMachine : StateMachine
 
     public PlayerIdlingState IdlingState { get; }
     public PlayerDashingState DashingState { get; }
+    public PlayerRollingState RollingState { get; }
 
     public PlayerWalkingState WalkingState { get; }
     public PlayerRunningState RunningState { get; }
@@ -15,7 +16,7 @@ public class PlayerMovementStateMachine : StateMachine
     public PlayerHardStoppingState HardStoppingState { get; }
 
     public PlayerLightLandingState LightLandingState { get; }
-    public PlayerRollingState RollingState { get; }
+    public PlayerFallRollingState FallRollingState { get; }
     public PlayerHardLandingState HardLandingState { get; }
 
     public PlayerJumpingState JumpingState { get; }
@@ -28,6 +29,7 @@ public class PlayerMovementStateMachine : StateMachine
 
         IdlingState = new PlayerIdlingState(this);
         DashingState = new PlayerDashingState(this);
+        RollingState = new PlayerRollingState(this);
 
         WalkingState = new PlayerWalkingState(this);
         RunningState = new PlayerRunningState(this);
@@ -38,7 +40,7 @@ public class PlayerMovementStateMachine : StateMachine
         HardStoppingState = new PlayerHardStoppingState(this);
 
         LightLandingState = new PlayerLightLandingState(this);
-        RollingState = new PlayerRollingState(this);
+        FallRollingState = new PlayerFallRollingState(this);
         HardLandingState = new PlayerHardLandingState(this);
 
         JumpingState = new PlayerJumpingState(this);

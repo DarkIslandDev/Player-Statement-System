@@ -29,6 +29,7 @@ public static class ObjectCreator
 
         dungeonFloor.GetComponent<MeshFilter>().mesh = mesh;
         dungeonFloor.GetComponent<MeshRenderer>().material = meshMaterial;
+        dungeonFloor.AddComponent<MeshCollider>();
 
         BoxCollider boxCollider = dungeonFloor.AddComponent<BoxCollider>();
         boxCollider.size = new Vector3(mesh.bounds.size.x, 5, mesh.bounds.size.z);
@@ -37,6 +38,7 @@ public static class ObjectCreator
         boxCollider.isTrigger = true;
 
         dungeonFloor.tag = "Ground";
+        dungeonFloor.layer = 6;
 
         return dungeonFloor;
     }
@@ -54,56 +56,6 @@ public static class ObjectCreator
                     : Quaternion.identity);
         }
     }
-
-    // public static void CreateWalls(List<Node> nodes, GameObject wallH, GameObject wallV, List<Vector3> posWallHPos,
-    //     List<Vector3> posWallVPos)
-    // {
-    //     Dictionary<Vector3, GameObject> wallPositionToGameObject = new Dictionary<Vector3, GameObject>();
-
-    //     foreach (Node node in nodes)
-    //     {
-    //         foreach (GameObject wall in node.Walls)
-    //         {
-    //             Vector3 wallPosition = wall.transform.position;
-    //             wallPositionToGameObject[wallPosition] = wall;
-    //         }
-    //     }
-
-    //     CreateWallsOfType(wallH, posWallHPos, wallPositionToGameObject);
-    //     CreateWallsOfType(wallV, posWallVPos, wallPositionToGameObject);
-
-    //     foreach (KeyValuePair<Vector3, GameObject> pair in wallPositionToGameObject)
-    //     {
-    //         pair.Value.tag = "Wall";
-    //     }
-
-    //     FindEmptyChildObjects(nodes);
-    // }
-
-    // private static void CreateWallsOfType(GameObject wall, List<Vector3> posWallPos,Dictionary<Vector3, GameObject> wallPositionToGameObject)
-    // {
-    //     foreach (Vector3 wallPosition in posWallPos)
-    //     {
-    //         if (wallPositionToGameObject.TryGetValue(wallPosition, out GameObject value))
-    //         {
-    //             if (value == null)
-    //             {
-    //                 CreateWall(wall, null, wallPosition);
-    //             }
-    //         }
-    //         else
-    //         {
-    //             CreateWall(wall, null, wallPosition);
-    //         }
-    //     }
-    // }
-
-    // public static GameObject CreateWall(GameObject wall, GameObject wallParent, Vector3 wallPos)
-    // {
-    //     GameObject wallGO = CreateObject(wall, wallParent, wallPos, Quaternion.identity);
-
-    //     return wallGO;
-    // }
 
     public static void CreateWalls(List<Node> nodes, GameObject wallH, GameObject wallV, List<Vector3> posWallHPos, 
         List<Vector3> posWallVPos)

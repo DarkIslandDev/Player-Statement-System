@@ -136,7 +136,7 @@ QualitySettings:
     useLegacyDetailDistribution: 1
     adaptiveVsync: 0
     vSyncCount: 1
-    realtimeGICPUUsage: 25
+    realtimeGICPUUsage: 75
     adaptiveVsyncExtraA: 0
     adaptiveVsyncExtraB: 0
     lodBias: 2
@@ -152,8 +152,8 @@ QualitySettings:
     asyncUploadTimeSlice: 2
     asyncUploadBufferSize: 16
     asyncUploadPersistentBuffer: 1
-    resolutionScalingFixedDPIFactor: 1
-    customRenderPipeline: {fileID: 11400000, guid: 7b7fd9122c28c4d15b667c7040e3b3fd,
+    resolutionScalingFixedDPIFactor: 1.15
+    customRenderPipeline: {fileID: 11400000, guid: 22b88c686436ea34eb03ed777a179321,
       type: 2}
     terrainQualityOverrides: 0
     terrainPixelError: 1

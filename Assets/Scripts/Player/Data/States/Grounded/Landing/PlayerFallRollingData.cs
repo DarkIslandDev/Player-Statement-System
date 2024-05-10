@@ -1,0 +1,7 @@
+using UnityEngine;
+
+[System.Serializable]
+public class PlayerFallRollingData
+{
+    [field: SerializeField] [field: Range(0f, 3f)] public float SpeedModifier { get; private set; } = 1f;
+}

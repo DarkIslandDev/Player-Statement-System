@@ -10,7 +10,7 @@ public class PlayerMediumStoppingState : PlayerStoppingState
 
         StartAnimation(stateMachine.Player.AnimationData.MediumStopParameterHash);
 
-        stateMachine.ReusableData.MovementDecelerationForce = groundedData.StopData.MediumDeceleration;
+        stateMachine.ReusableData.MovementDecelerationForce = groundedData.StopData.MediumDecelerationForce;
 
         stateMachine.ReusableData.CurrentJumpForce = airborneData.JumpData.MediumForce;
     }

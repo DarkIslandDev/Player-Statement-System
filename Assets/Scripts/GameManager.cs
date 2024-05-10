@@ -1,4 +1,5 @@
 ﻿using System;
+using Cinemachine;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -10,14 +11,14 @@ public class GameManager : MonoBehaviour
     [Header("Components")]
     [SerializeField] private DungeonGenerator dungeonGenerator;
     [SerializeField] private MinimapCamera minimapCamera;
+    [SerializeField] private CinemachineVirtualCamera virtualCamera;
     
     private UIManager uiManager;
     private Player player;
-    private CameraHandler cameraHandler;
 
     public static GameManager Instance;
     public Player PlayerPrefab => player;
-    public CameraHandler CameraHandler => cameraHandler;
+    public CinemachineVirtualCamera VirtualCamera { get => virtualCamera; private set => virtualCamera = value; }
     public DungeonGenerator DungeonGenerator => dungeonGenerator;
 
     private void Awake()
@@ -33,32 +34,22 @@ public class GameManager : MonoBehaviour
         }
 
         uiManager = UIManager.Instance;
+        dungeonGenerator ??= GetComponent<DungeonGenerator>();
     }
 
     private void Start()
     {
-        // SpawnPlayerOnStart();
+        SpawnPlayerOnStart();
     }
 
-    // private void SpawnPlayerOnStart()
-    // {
-    //     if (playerPrefab != null)
-    //     {
-    //         GameObject p = Instantiate(
-    //             playerPrefab, 
-    //             playerPrefab.transform.localPosition,
-    //             playerPrefab.transform.localRotation);
-    //         player = p.GetComponent<Player>();
-    //         player.transform.localPosition = dungeonGenerator.GetSafeRoomPosition();
-    //
-    //         GameObject c = Instantiate(
-    //             cameraPrefab,
-    //              Vector3.zero,
-    //               Quaternion.identity);
-    //         cameraHandler = c.GetComponent<CameraHandler>();
-    //
-    //         player.Init(cameraHandler, minimapCamera, uiManager.GUIMenu);
-    //         cameraHandler.Init(player.transform);
-    //     }
-    // }
+    public void SpawnPlayerOnStart()
+    {
+        GameObject p = Instantiate(
+            playerPrefab,
+            dungeonGenerator.GetSafeRoomPosition(),
+            playerPrefab.transform.localRotation);
+            
+        player = p.GetComponent<Player>();
+        player.Init(virtualCamera, uiManager.InteractionButton);
+    }
 }

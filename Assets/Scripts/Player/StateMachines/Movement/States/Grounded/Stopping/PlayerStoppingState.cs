@@ -9,9 +9,7 @@ public class PlayerStoppingState : PlayerGroundedState
     public override void Enter()
     {
         stateMachine.ReusableData.MovementSpeedModifier = 0f;
-
-        SetBaseCameraRecenteringData();
-
+        
         base.Enter();
 
         StartAnimation(stateMachine.Player.AnimationData.StoppingParameterHash);

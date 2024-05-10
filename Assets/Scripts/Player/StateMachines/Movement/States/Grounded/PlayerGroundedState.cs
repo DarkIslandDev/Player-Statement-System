@@ -15,7 +15,6 @@ public class PlayerGroundedState : PlayerMovementState
 
         UpdateShouldSprintState();
 
-        UpdateCameraRecenteringState(stateMachine.ReusableData.MovementInput);
     }
 
     public override void Exit()
@@ -56,7 +55,7 @@ public class PlayerGroundedState : PlayerMovementState
 
         if (Physics.Raycast(downwardsRayFromCapsuleCenter, out RaycastHit hit,
                 stateMachine.Player.ColliderUtility.SlopeData.FloatRayDistance,
-                stateMachine.Player.PlayerLayerData.GroundLayer, QueryTriggerInteraction.Ignore))
+                stateMachine.Player.LayerData.GroundLayer, QueryTriggerInteraction.Ignore))
         {
             float groundAngle = Vector3.Angle(hit.normal, -downwardsRayFromCapsuleCenter.direction);
 
@@ -93,8 +92,6 @@ public class PlayerGroundedState : PlayerMovementState
         if (stateMachine.ReusableData.MovementOnSlopesSpeedModifier != slopeSpeedModifier)
         {
             stateMachine.ReusableData.MovementOnSlopesSpeedModifier = slopeSpeedModifier;
-
-            UpdateCameraRecenteringState(stateMachine.ReusableData.MovementInput);
         }
 
         return slopeSpeedModifier;
@@ -128,6 +125,11 @@ public class PlayerGroundedState : PlayerMovementState
         stateMachine.ChangeState(stateMachine.JumpingState);
     }
 
+    protected virtual void OnRollStarted(InputAction.CallbackContext context)
+    {
+        
+    }
+
     protected virtual void OnMove()
     {
         if (stateMachine.ReusableData.ShouldSprint)
@@ -147,7 +149,7 @@ public class PlayerGroundedState : PlayerMovementState
         stateMachine.ChangeState(stateMachine.RunningState);
     }
 
-    protected override void OnContactWithGroundExited(Collider collider)
+    protected override void OnContactWithGroundExit(Collider collider)
     {
         if (IsThereGroundUnderneath())
         {
@@ -159,11 +161,11 @@ public class PlayerGroundedState : PlayerMovementState
 
         Ray downwardsRayFromCapsuleBottom =
             new Ray(
-                capsuleColliderCenterInWorldSpace - stateMachine.Player.ColliderUtility.CapsuleColliderData
-                    .ColliderVerticalExtents, Vector3.down);
+                capsuleColliderCenterInWorldSpace -
+                stateMachine.Player.ColliderUtility.CapsuleColliderData.ColliderVerticalExtents, Vector3.down);
 
         if (!Physics.Raycast(downwardsRayFromCapsuleBottom, out _, groundedData.GroundToFallRayDistance,
-                stateMachine.Player.PlayerLayerData.GroundLayer, QueryTriggerInteraction.Ignore))
+                stateMachine.Player.LayerData.GroundLayer, QueryTriggerInteraction.Ignore))
         {
             OnFall();
         }
@@ -171,14 +173,13 @@ public class PlayerGroundedState : PlayerMovementState
 
     private bool IsThereGroundUnderneath()
     {
-        PlayerTriggerColliderData triggerColliderData =
-            stateMachine.Player.ColliderUtility.TriggerColliderData;
+        PlayerTriggerColliderData triggerColliderData = stateMachine.Player.ColliderUtility.TriggerColliderData;
 
         Vector3 groundColliderCenterInWorldSpace = triggerColliderData.GroundCheckCollider.bounds.center;
 
         Collider[] overlappedGroundColliders = Physics.OverlapBox(groundColliderCenterInWorldSpace,
-            triggerColliderData.GroundCheckColliderExtents,
-            triggerColliderData.GroundCheckCollider.transform.rotation, stateMachine.Player.PlayerLayerData.GroundLayer,
+            triggerColliderData.GroundCheckColliderVerticalExtents,
+            triggerColliderData.GroundCheckCollider.transform.rotation, stateMachine.Player.LayerData.GroundLayer,
             QueryTriggerInteraction.Ignore);
 
         return overlappedGroundColliders.Length > 0;

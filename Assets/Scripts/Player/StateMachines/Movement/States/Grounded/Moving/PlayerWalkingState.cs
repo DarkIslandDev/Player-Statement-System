@@ -24,8 +24,6 @@ public class PlayerWalkingState : PlayerMovingState
         base.Exit();
 
         StopAnimation(stateMachine.Player.AnimationData.WalkParameterHash);
-
-        SetBaseCameraRecenteringData();
     }
 
     protected override void OnWalkToggleStarted(InputAction.CallbackContext context)

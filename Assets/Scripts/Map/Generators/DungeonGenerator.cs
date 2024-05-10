@@ -1,30 +1,25 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-[Serializable]
-public class Prefabs
-{
-    public GameObject wallHorizontal;
-    public GameObject wallVertical;
-    public GameObject door;
-    public GameObject pillar;
-    public GameObject torch;
-}
-
-[Serializable]
-public class Components
-{
-    public BinarySpacePartitioner binarySpacePartitioner;
-    public RoomGenerator roomGenerator;
-    public CorridorGenerator corridorGenerator;
-}
-
 public class DungeonGenerator : MonoBehaviour
 {
-    [Space][SerializeField] private List<RoomNode> rooms = new List<RoomNode>();
-    [Space][SerializeField] private List<CorridorNode> corridors = new List<CorridorNode>();
+    [Header("References")] [SerializeField]
+    private DungeonGeneratorSO dungeonData;
+
+    [Header("Components")] [SerializeField]
+    private BinarySpacePartitioner binarySpacePartitioner;
+
+    [SerializeField] private RoomGenerator roomGenerator;
+    [SerializeField] private CorridorGenerator corridorGenerator;
+
+    [Header("Room Lists")] [SerializeField]
+    private List<RoomNode> rooms = new List<RoomNode>();
+
+    [SerializeField] private List<CorridorNode> corridors = new List<CorridorNode>();
+
+    [Header("Spawn Room")] [SerializeField]
+    private RoomNode safeRoomNode;
 
     private List<Node> allRoomsCollection = new List<Node>();
     private List<Node> nodes;
@@ -38,31 +33,67 @@ public class DungeonGenerator : MonoBehaviour
     private GameObject roomsParent;
     private GameObject corridorsParent;
 
-    [SerializeField] private RoomNode safeRoomNode;
+    public DungeonGeneratorSO DungeonData
+    {
+        get => dungeonData;
+        private set => dungeonData = value;
+    }
 
-    [Space] public DungeonGeneratorSO dungeonData;
-    [Space] public Prefabs prefabs;
-    [Space] public Components components;
 
-    public List<RoomNode> Rooms { get => rooms; set => rooms = value; }
+    public List<RoomNode> Rooms
+    {
+        get => rooms;
+        set => rooms = value;
+    }
 
-    public List<CorridorNode> Corridors { get => corridors; set => corridors = value; }
+    public List<CorridorNode> Corridors
+    {
+        get => corridors;
+        set => corridors = value;
+    }
 
-    public GameObject RoomsParent { get => roomsParent; set => roomsParent = value; }
+    public GameObject RoomsParent
+    {
+        get => roomsParent;
+        set => roomsParent = value;
+    }
 
-    public GameObject CorridorsParent { get => corridorsParent; set => corridorsParent = value; }
+    public GameObject CorridorsParent
+    {
+        get => corridorsParent;
+        set => corridorsParent = value;
+    }
 
-    public List<Vector3> PossibleWallHorizontalPosition { get => possibleWallHorizontalPosition; set => possibleWallHorizontalPosition = value; }
-    public List<Vector3> PossibleWallVerticalPosition { get => possibleWallVerticalPosition; set => possibleWallVerticalPosition = value; }
-    public List<Vector3> PossibleDoorHorizontalPosition { get => possibleDoorHorizontalPosition; set => possibleDoorHorizontalPosition = value; }
-    public List<Vector3> PossibleDoorVerticalPosition { get => possibleDoorVerticalPosition; set => possibleDoorVerticalPosition = value; }
+    public List<Vector3> PossibleWallHorizontalPosition
+    {
+        get => possibleWallHorizontalPosition;
+        set => possibleWallHorizontalPosition = value;
+    }
+
+    public List<Vector3> PossibleWallVerticalPosition
+    {
+        get => possibleWallVerticalPosition;
+        set => possibleWallVerticalPosition = value;
+    }
+
+    public List<Vector3> PossibleDoorHorizontalPosition
+    {
+        get => possibleDoorHorizontalPosition;
+        set => possibleDoorHorizontalPosition = value;
+    }
+
+    public List<Vector3> PossibleDoorVerticalPosition
+    {
+        get => possibleDoorVerticalPosition;
+        set => possibleDoorVerticalPosition = value;
+    }
 
 
     private void Awake()
     {
-        components.roomGenerator ??= GetComponent<RoomGenerator>();
-        components.corridorGenerator ??= GetComponent<CorridorGenerator>();
-        components.binarySpacePartitioner ??= GetComponent<BinarySpacePartitioner>();
+        roomGenerator ??= GetComponent<RoomGenerator>();
+        corridorGenerator ??= GetComponent<CorridorGenerator>();
+        binarySpacePartitioner ??= GetComponent<BinarySpacePartitioner>();
 
         CreateDungeon();
     }
@@ -86,41 +117,43 @@ public class DungeonGenerator : MonoBehaviour
 
     private void CreateBaseDungeon()
     {
-        components.binarySpacePartitioner.Init(
-            dungeonData.dungeonWidth,
-            dungeonData.dungeonLength
+        binarySpacePartitioner.Init(
+            DungeonData.dungeonWidth,
+            DungeonData.dungeonLength
         );
 
-        components.corridorGenerator.Init(
+        corridorGenerator.Init(
+            this,
             possibleWallHorizontalPosition,
             possibleDoorHorizontalPosition,
             possibleWallVerticalPosition,
             possibleDoorVerticalPosition);
 
-        components.roomGenerator.Init(
+        roomGenerator.Init(
+            this,
             possibleWallHorizontalPosition,
             possibleDoorHorizontalPosition,
             possibleWallVerticalPosition,
             possibleDoorVerticalPosition);
 
         allRoomsCollection.AddRange(
-            components.binarySpacePartitioner.PrepareRoomNodesCollection(
-                dungeonData.maxIterations,
-                dungeonData.roomWidthMin,
-                dungeonData.roomLengthMin
+            binarySpacePartitioner.PrepareRoomNodesCollection(
+                DungeonData.maxIterations,
+                DungeonData.roomWidthMin,
+                DungeonData.roomLengthMin
             ));
 
-        components.roomGenerator.CalculateRooms(
-            dungeonData.roomBottomCornerModifier,
-            dungeonData.roomTopCornerModifier,
-            dungeonData.roomOffset);
+        roomGenerator.CalculateRooms(
+            DungeonData.roomBottomCornerModifier,
+            DungeonData.roomTopCornerModifier,
+            DungeonData.roomOffset);
 
-        safeRoomNode = components.roomGenerator.GetSafeRoom();
+        safeRoomNode = roomGenerator.GetSafeRoom();
 
-        components.corridorGenerator.CalculateCorridor(
+        corridorGenerator.CalculateCorridor(
             allRoomsCollection,
-            prefabs.door,
-            dungeonData.corridorWidth);
+            DungeonData.corridorDoor,
+            DungeonData.corridorWidth);
     }
 
     private void CreateWalls()
@@ -131,8 +164,8 @@ public class DungeonGenerator : MonoBehaviour
 
         ObjectCreator.CreateWalls(
             nodes,
-            prefabs.wallHorizontal,
-            prefabs.wallVertical,
+            DungeonData.horizontalWall,
+            DungeonData.verticalWall,
             possibleWallHorizontalPosition,
             possibleWallVerticalPosition);
 
@@ -140,16 +173,15 @@ public class DungeonGenerator : MonoBehaviour
         {
             CheckPassages(rooms[i]);
         }
-
     }
 
     private void CreateDecorations()
     {
-        components.roomGenerator.GetRoomsByCategory();
-        components.roomGenerator.SpawnDecorationInRooms();
+        roomGenerator.GetRoomsByCategory();
+        roomGenerator.SpawnDecorationInRooms();
 
-        ObjectCreator.CreatePillars(rooms, dungeonData.pillars);
-        ObjectCreator.CreateTorches(rooms, prefabs.torch);
+        ObjectCreator.CreatePillars(rooms, DungeonData.pillars);
+        ObjectCreator.CreateTorches(rooms, DungeonData.torch);
     }
 
     #endregion
@@ -177,13 +209,22 @@ public class DungeonGenerator : MonoBehaviour
         corridorsParent = new GameObject("Corridors");
         corridorsParent.transform.parent = transform;
     }
+    
+    public Vector3 GetSafeRoomPosition()
+    {
+        float x = safeRoomNode.BoxCollider.center.x;
+        float z = safeRoomNode.BoxCollider.center.z;
+
+        return new Vector3(x, 0.2f, z);
+    }
 
     public void ResetDungeon()
     {
         allRoomsCollection.Clear();
         rooms.Clear();
         corridors.Clear();
-        components.roomGenerator.RoomList.Clear();
+        roomGenerator.ResetRooms();
+        corridorGenerator.ResetCorridors();
 
         nodes = new List<Node>();
         possibleDoorVerticalPosition = new List<Vector3>();
@@ -199,14 +240,6 @@ public class DungeonGenerator : MonoBehaviour
             }
         }
     }
-
-    public Vector3 GetSafeRoomPosition()
-    {
-        float x = safeRoomNode.TopRightAreaCorner.x / 2;
-        float z = safeRoomNode.TopRightAreaCorner.x / 2;
-
-        return new Vector3(x, 0, z);
-    }
-
+    
     #endregion
 }

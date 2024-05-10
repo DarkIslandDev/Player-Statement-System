@@ -2,130 +2,127 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class PlayerJumpingState : PlayerAirborneState
-{
-    private bool shouldKeepRotating;
-    private bool canStartFalling;
-
-    public PlayerJumpingState(PlayerMovementStateMachine playerMovementStateMachine) : base(playerMovementStateMachine)
     {
-    }
+        private bool shouldKeepRotating;
+        private bool canStartFalling;
 
-    public override void Enter()
-    {
-        base.Enter();
-
-        stateMachine.ReusableData.MovementSpeedModifier = 0f;
-
-        stateMachine.ReusableData.MovementDecelerationForce = airborneData.JumpData.DecelerationForce;
-
-        stateMachine.ReusableData.RotationData = airborneData.JumpData.RotationData;
-
-        shouldKeepRotating = stateMachine.ReusableData.MovementInput != Vector2.zero;
-
-        Jump();
-    }
-
-    public override void Exit()
-    {
-        base.Exit();
-
-        SetBaseRotationData();
-
-        canStartFalling = false;
-    }
-
-    public override void Update()
-    {
-        base.Update();
-
-        if (!canStartFalling && IsMovingUp(0f))
+        public PlayerJumpingState(PlayerMovementStateMachine playerMovementStateMachine) : base(playerMovementStateMachine)
         {
-            canStartFalling = true;
         }
 
-        if (!canStartFalling || IsMovingUp(0f))
+        public override void Enter()
         {
-            return;
+            base.Enter();
+
+            stateMachine.ReusableData.MovementSpeedModifier = 0f;
+
+            stateMachine.ReusableData.MovementDecelerationForce = airborneData.JumpData.DecelerationForce;
+
+            stateMachine.ReusableData.RotationData = airborneData.JumpData.RotationData;
+
+            shouldKeepRotating = stateMachine.ReusableData.MovementInput != Vector2.zero;
+
+            Jump();
         }
 
-        stateMachine.ChangeState(stateMachine.FallingState);
-    }
-
-    public override void PhysicsUpdate()
-    {
-        base.PhysicsUpdate();
-
-        if (shouldKeepRotating)
+        public override void Exit()
         {
-            RotateTowardsTargetRotation();
+            base.Exit();
+
+            SetBaseRotationData();
+
+            canStartFalling = false;
         }
 
-        if (IsMovingUp())
+        public override void Update()
         {
-            DecelerateVertically();
-        }
-    }
+            base.Update();
 
-    private void Jump()
-    {
-        Vector3 jumpForce = stateMachine.ReusableData.CurrentJumpForce;
+            if (!canStartFalling && IsMovingUp(0f))
+            {
+                canStartFalling = true;
+            }
 
-        Vector3 jumpDirection = stateMachine.Player.transform.forward;
+            if (!canStartFalling || IsMovingUp(0f))
+            {
+                return;
+            }
 
-        if (shouldKeepRotating)
-        {
-            UpdateTargetRotation(GetMovementInputDirection());
-
-            jumpDirection = GetTargetRotationDirection(stateMachine.ReusableData.CurrentTargetRotation.y);
+            stateMachine.ChangeState(stateMachine.FallingState);
         }
 
-        jumpForce.x *= jumpDirection.x;
-        jumpForce.z *= jumpDirection.z;
-
-        jumpForce = GetJumpForceOnSlope(jumpForce);
-
-        ResetVelocity();
-
-        stateMachine.Player.Rigidbody.AddForce(jumpForce, ForceMode.VelocityChange);
-    }
-
-    private Vector3 GetJumpForceOnSlope(Vector3 jumpForce)
-    {
-        Vector3 capsuleColliderCenterInWorldSpace =
-            stateMachine.Player.ColliderUtility.CapsuleColliderData.Collider.bounds.center;
-
-        Ray downwardsRayFromCapsuleCenter = new Ray(capsuleColliderCenterInWorldSpace, Vector3.down);
-
-        if (Physics.Raycast(downwardsRayFromCapsuleCenter, out RaycastHit hit,
-                airborneData.JumpData.JumpToGroundRayDistance, stateMachine.Player.PlayerLayerData.GroundLayer,
-                QueryTriggerInteraction.Ignore))
+        public override void PhysicsUpdate()
         {
-            float groundAngle = Vector3.Angle(hit.normal, -downwardsRayFromCapsuleCenter.direction);
+            base.PhysicsUpdate();
+
+            if (shouldKeepRotating)
+            {
+                RotateTowardsTargetRotation();
+            }
 
             if (IsMovingUp())
             {
-                float forceModifier = airborneData.JumpData.JumpForceModifierOnSlopeUpwards.Evaluate(groundAngle);
-
-                jumpForce.x *= forceModifier;
-                jumpForce.z *= forceModifier;
-            }
-
-            if (IsMovingDown())
-            {
-                float forceModifier = airborneData.JumpData.JumpForceModifierOnSlopeDownwards.Evaluate(groundAngle);
-
-                jumpForce.y *= forceModifier;
+                DecelerateVertically();
             }
         }
 
-        return jumpForce;
-    }
+        private void Jump()
+        {
+            Vector3 jumpForce = stateMachine.ReusableData.CurrentJumpForce;
 
-    protected override void ResetSprintState()
-    {
-    }
+            Vector3 jumpDirection = stateMachine.Player.transform.forward;
 
-    protected override void OnMovementCanceled(InputAction.CallbackContext context)
-    {
+            if (shouldKeepRotating)
+            {
+                UpdateTargetRotation(GetMovementInputDirection());
+
+                jumpDirection = GetTargetRotationDirection(stateMachine.ReusableData.CurrentTargetRotation.y);
+            }
+
+            jumpForce.x *= jumpDirection.x;
+            jumpForce.z *= jumpDirection.z;
+
+            jumpForce = GetJumpForceOnSlope(jumpForce);
+
+            ResetVelocity();
+
+            stateMachine.Player.Rigidbody.AddForce(jumpForce, ForceMode.VelocityChange);
+        }
+
+        private Vector3 GetJumpForceOnSlope(Vector3 jumpForce)
+        {
+            Vector3 capsuleColliderCenterInWorldSpace = stateMachine.Player.ColliderUtility.CapsuleColliderData.Collider.bounds.center;
+
+            Ray downwardsRayFromCapsuleCenter = new Ray(capsuleColliderCenterInWorldSpace, Vector3.down);
+
+            if (Physics.Raycast(downwardsRayFromCapsuleCenter, out RaycastHit hit, airborneData.JumpData.JumpToGroundRayDistance, stateMachine.Player.LayerData.GroundLayer, QueryTriggerInteraction.Ignore))
+            {
+                float groundAngle = Vector3.Angle(hit.normal, -downwardsRayFromCapsuleCenter.direction);
+
+                if (IsMovingUp())
+                {
+                    float forceModifier = airborneData.JumpData.JumpForceModifierOnSlopeUpwards.Evaluate(groundAngle);
+
+                    jumpForce.x *= forceModifier;
+                    jumpForce.z *= forceModifier;
+                }
+
+                if (IsMovingDown())
+                {
+                    float forceModifier = airborneData.JumpData.JumpForceModifierOnSlopeDownwards.Evaluate(groundAngle);
+
+                    jumpForce.y *= forceModifier;
+                }
+            }
+
+            return jumpForce;
+        }
+
+        protected override void ResetSprintState()
+        {
+        }
+
+        protected override void OnMovementCanceled(InputAction.CallbackContext context)
+        {
+        }
     }
-}

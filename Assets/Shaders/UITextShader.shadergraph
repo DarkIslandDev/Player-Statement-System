@@ -56,6 +56,9 @@
         },
         {
             "m_Id": "d7450be1bbd84a2a9c7537e15d39dc28"
+        },
+        {
+            "m_Id": "986bbbd938b940c7a47b46003fc2e7f3"
         }
     ],
     "m_GroupDatas": [],
@@ -213,6 +216,9 @@
         "m_Blocks": [
             {
                 "m_Id": "2ddcfbc682184d08a91e136761a3d696"
+            },
+            {
+                "m_Id": "986bbbd938b940c7a47b46003fc2e7f3"
             },
             {
                 "m_Id": "ad876edf7407420d9fe9e7e19bd95525"
@@ -651,9 +657,9 @@
         "m_Position": {
             "serializedVersion": "2",
             "x": -710.0000610351563,
-            "y": 13.000009536743164,
-            "width": 105.0,
-            "height": 33.999977111816409
+            "y": 13.000017166137696,
+            "width": 105.00006103515625,
+            "height": 34.0
         }
     },
     "m_Slots": [
@@ -1072,6 +1078,40 @@
     "m_ShaderOutputName": "Out",
     "m_StageCapability": 3,
     "m_BareResource": false
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.BlockNode",
+    "m_ObjectId": "986bbbd938b940c7a47b46003fc2e7f3",
+    "m_Group": {
+        "m_Id": ""
+    },
+    "m_Name": "SurfaceDescription.SpriteMask",
+    "m_DrawState": {
+        "m_Expanded": true,
+        "m_Position": {
+            "serializedVersion": "2",
+            "x": 13.00002670288086,
+            "y": 266.0,
+            "width": 200.00006103515626,
+            "height": 41.00006103515625
+        }
+    },
+    "m_Slots": [
+        {
+            "m_Id": "fe16a64756db4878bc3e3e3ee7095113"
+        }
+    ],
+    "synonyms": [],
+    "m_Precision": 0,
+    "m_PreviewExpanded": true,
+    "m_DismissedVersion": 0,
+    "m_PreviewMode": 0,
+    "m_CustomColors": {
+        "m_SerializableColors": []
+    },
+    "m_SerializedDescriptor": "SurfaceDescription.SpriteMask"
 }
 
 {
@@ -1520,5 +1560,30 @@
         "m_Guid": ""
     },
     "m_DefaultType": 0
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.ColorRGBAMaterialSlot",
+    "m_ObjectId": "fe16a64756db4878bc3e3e3ee7095113",
+    "m_Id": 0,
+    "m_DisplayName": "Sprite Mask",
+    "m_SlotType": 0,
+    "m_Hidden": false,
+    "m_ShaderOutputName": "SpriteMask",
+    "m_StageCapability": 2,
+    "m_Value": {
+        "x": 1.0,
+        "y": 1.0,
+        "z": 1.0,
+        "w": 1.0
+    },
+    "m_DefaultValue": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0,
+        "w": 0.0
+    },
+    "m_Labels": []
 }
 

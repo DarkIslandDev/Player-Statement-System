@@ -1,12 +1,9 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [System.Serializable]
 public class PlayerFallData
 {
-    [field: SerializeField]
-    [field: Range(1, 15)]
-    public float FallSpeedLimit { get; private set; } = 15;
-    [field: SerializeField]
-    [field: Range(1, 100)]
-    public float MinimumDistanceToBeConsideredHardFall { get; private set; } = 3;
+    [field: Tooltip("Having higher numbers might not read collisions with shallow colliders correctly.")]
+    [field: SerializeField] [field: Range(0f, 10f)] public float FallSpeedLimit { get; private set; } = 10f;
+    [field: SerializeField] [field: Range(0f, 100f)] public float MinimumDistanceToBeConsideredHardFall { get; private set; } = 3f;
 }

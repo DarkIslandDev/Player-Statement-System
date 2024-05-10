@@ -1,18 +1,22 @@
-﻿using System;
-using Cinemachine;
+﻿using Cinemachine;
 using UnityEngine;
 
 public class CameraZoom : MonoBehaviour
 {
-    [SerializeField] [Range(0, 10)] private float defaultDistance = 6;
+    [SerializeField] [Range(0, 10)] private float defaultDistance = 5;
     [SerializeField] [Range(0, 10)] private float minimumDistance = 1;
-    [SerializeField] [Range(0, 10)] private float maximumDistance = 6;
+    [SerializeField] [Range(0, 10)] private float maximumDistance = 5;
+
+    private float minimumHeight = 0.88f;
+    private float maximumHeight = 1.65f;
     
     [SerializeField] [Range(0, 10)] private float smoothing = 4;
     [SerializeField] [Range(0, 10)] private float zoomSensitivity = 1;
 
     private CinemachineFramingTransposer framingTransposer;
     private CinemachineInputProvider inputProvider;
+    private CinemachineVirtualCamera virtualCamera;
+    private Transform lookAtTransform;
 
     private float currentTargetDistance;
 
@@ -22,8 +26,10 @@ public class CameraZoom : MonoBehaviour
             .GetCinemachineComponent<CinemachineFramingTransposer>();
 
         inputProvider ??= GetComponent<CinemachineInputProvider>();
+        virtualCamera ??= GetComponent<CinemachineVirtualCamera>();
 
         currentTargetDistance = defaultDistance;
+        lookAtTransform = virtualCamera.LookAt;
     }
 
     private void Update()
@@ -40,8 +46,8 @@ public class CameraZoom : MonoBehaviour
             minimumDistance,
             maximumDistance);
         
-        float currentDistance = framingTransposer.m_CameraDistance;
-
+        float currentDistance = virtualCamera.m_Lens.OrthographicSize;
+        
         if (currentDistance == currentTargetDistance)
         {
             return;
@@ -51,7 +57,17 @@ public class CameraZoom : MonoBehaviour
             currentDistance, 
             currentTargetDistance, 
             smoothing * Time.deltaTime);
-
-        framingTransposer.m_CameraDistance = lerpedZoomValue;
+        
+        float targetHeight = Mathf.Lerp(
+            minimumHeight, 
+            maximumHeight, 
+            (lerpedZoomValue - minimumDistance) / (maximumDistance - minimumDistance));
+    
+        virtualCamera.m_Lens.OrthographicSize = lerpedZoomValue;
+        
+        lookAtTransform.position = new Vector3(
+            lookAtTransform.position.x, 
+            targetHeight, 
+            lookAtTransform.position.z);
     }
 }

@@ -17,13 +17,9 @@ public class CorridorGenerator : MonoBehaviour
 
     public List<CorridorNode> CorridorList => corridorList;
 
-    private void Awake()
+    public void Init(DungeonGenerator g, List<Vector3> pwhp, List<Vector3> pdhp, List<Vector3> pwvp, List<Vector3> pdvp)
     {
-        dungeonGenerator ??= GetComponent<DungeonGenerator>();
-    }
-
-    public void Init(List<Vector3> pwhp, List<Vector3> pdhp, List<Vector3> pwvp, List<Vector3> pdvp)
-    {
+        dungeonGenerator = g;
         possibleWallHorizontalPosition = pwhp;
         possibleWallVerticalPosition = pwvp;
         possibleDoorHorizontalPosition = pdhp;
@@ -48,7 +44,7 @@ public class CorridorGenerator : MonoBehaviour
             GameObject meshGO = ObjectCreator.CreateMesh(
                 nodes[i].BottomLeftAreaCorner,
                 nodes[i].TopRightAreaCorner,
-                dungeonGenerator.dungeonData.floorMaterial);
+                dungeonGenerator.DungeonData.floorMaterial);
 
             MeshFilter meshFilter = meshGO.GetComponent<MeshFilter>();
 
@@ -299,5 +295,10 @@ public class CorridorGenerator : MonoBehaviour
         }
 
         return childTransforms;
+    }
+
+    public void ResetCorridors()
+    {
+        corridorList.Clear();
     }
 }

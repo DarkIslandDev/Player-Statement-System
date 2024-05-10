@@ -25,14 +25,9 @@ public class RoomGenerator : MonoBehaviour
     public List<RoomNode> BossRooms => bossRooms;
     public List<RoomNode> MerchantRooms => merchantRooms;
 
-    private void Awake()
+    public void Init(DungeonGenerator g, List<Vector3> pwhp, List<Vector3> pdhp, List<Vector3> pwvp, List<Vector3> pdvp)
     {
-        binarySpacePartitioner ??= GetComponent<BinarySpacePartitioner>();
-        dungeonGenerator ??= GetComponent<DungeonGenerator>();
-    }
-
-    public void Init(List<Vector3> pwhp, List<Vector3> pdhp, List<Vector3> pwvp, List<Vector3> pdvp)
-    {
+        dungeonGenerator = g;
         possibleWallHorizontalPosition = pwhp;
         possibleWallVerticalPosition = pwvp;
         possibleDoorHorizontalPosition = pdhp;
@@ -85,7 +80,7 @@ public class RoomGenerator : MonoBehaviour
             GameObject meshGO = ObjectCreator.CreateMesh(
                 roomNodes[i].BottomLeftAreaCorner,
                 roomNodes[i].TopRightAreaCorner,
-                dungeonGenerator.dungeonData.floorMaterial
+                dungeonGenerator.DungeonData.floorMaterial
             );
 
             Mesh mesh = meshGO.GetComponent<MeshFilter>().sharedMesh;
@@ -347,7 +342,7 @@ public class RoomGenerator : MonoBehaviour
     {
         for (int i = 0; i < monsterRooms.Count; i++)
         {
-            Decoration decoration = GetRandomDecoration(dungeonGenerator.dungeonData.monsterRoomDecorations);
+            Decoration decoration = GetRandomDecoration(dungeonGenerator.DungeonData.monsterRoomDecorations);
             ObjectCreator.CreateDecoration(monsterRooms[i], decoration);
         }
     }
@@ -361,7 +356,7 @@ public class RoomGenerator : MonoBehaviour
                 return;
             }
 
-            Decoration decoration = GetRandomDecoration(dungeonGenerator.dungeonData.treasureRoomDecorations);
+            Decoration decoration = GetRandomDecoration(dungeonGenerator.DungeonData.treasureRoomDecorations);
             ObjectCreator.CreateDecoration(treasureRooms[i], decoration);
         }
     }
@@ -414,6 +409,15 @@ public class RoomGenerator : MonoBehaviour
                     break;
             }
         }
+    }
+    
+    public void ResetRooms()
+    {
+        roomList.Clear();
+        monsterRooms.Clear();
+        treasureRooms.Clear();
+        bossRooms.Clear();
+        merchantRooms.Clear();
     }
 
     #endregion
